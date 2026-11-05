@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Đăng Ký Tài Khoản - Book Reading Tracker</title>
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <!-- CSS Styles -->
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="../css/auth.css">
+</head>
+<body class="auth-body">
+
+    <div class="auth-container">
+        <!-- Logo & Title -->
+        <div class="auth-header">
+            <div class="auth-logo">
+                <i class="fas fa-book-open-reader"></i>
+            </div>
+            <h1 class="auth-title">Tạo Tài Khoản Mới</h1>
+            <p class="auth-desc">Xây dựng thói quen đọc sách mỗi ngày cùng Book Tracker</p>
+        </div>
+
+        <!-- Alert Notification -->
+        <div id="authAlert" class="auth-alert"></div>
+
+        <!-- Register Form -->
+        <form id="registerForm" novalidate>
+            <div class="form-group">
+                <label for="registerFullName" class="form-label">
+                    Họ và tên <span class="required">*</span>
+                </label>
+                <div class="input-group">
+                    <i class="fas fa-user input-icon-left"></i>
+                    <input type="text" id="registerFullName" class="form-control with-icon-left" placeholder="Ví dụ: Nguyễn Văn A" required>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="registerEmail" class="form-label">
+                    Địa chỉ Email <span class="required">*</span>
+                </label>
+                <div class="input-group">
+                    <i class="fas fa-envelope input-icon-left"></i>
+                    <input type="email" id="registerEmail" class="form-control with-icon-left" placeholder="nhapemail@cuaban.com" required>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="registerPassword" class="form-label">
+                    Mật khẩu <span class="required">*</span>
+                </label>
+                <div class="input-group">
+                    <i class="fas fa-lock input-icon-left"></i>
+                    <input type="password" id="registerPassword" class="form-control with-icon-left" placeholder="Tối thiểu 6 ký tự" required autocomplete="new-password">
+                    <button type="button" class="btn-toggle-password" title="Ẩn/Hiện mật khẩu" aria-label="Hiện mật khẩu">
+                        <i class="fas fa-eye"></i>
+                    </button>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="registerConfirmPassword" class="form-label">
+                    Xác nhận mật khẩu <span class="required">*</span>
+                </label>
+                <div class="input-group">
+                    <i class="fas fa-shield-check input-icon-left"></i>
+                    <input type="password" id="registerConfirmPassword" class="form-control with-icon-left" placeholder="Nhập lại mật khẩu" required autocomplete="new-password">
+                    <button type="button" class="btn-toggle-password" title="Ẩn/Hiện mật khẩu" aria-label="Hiện mật khẩu">
+                        <i class="fas fa-eye"></i>
+                    </button>
+                </div>
+            </div>
+
+            <button type="submit" class="btn btn-primary btn-auth-submit">
+                <i class="fas fa-user-plus"></i> Đăng Ký Tài Khoản
+            </button>
+        </form>
+
+        <!-- Footer Link -->
+        <div class="auth-footer">
+            Đã có tài khoản? <a href="login.html">Đăng nhập ngay</a>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="../js/storage.js"></script>
+    <script src="../js/data.js"></script>
+    <script src="../js/auth.js"></script>
+</body>
+</html>

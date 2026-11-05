@@ -1,0 +1,42 @@
+/* ===================================================================
+   STATISTICS STYLES (css/statistics.css)
+   =================================================================== */
+
+.stats-summary-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 1.25rem;
+    margin-bottom: 2rem;
+}
+
+.stats-charts-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.stats-full-chart {
+    grid-column: 1 / -1;
+}
+
+.chart-wrapper {
+    position: relative;
+    height: 330px;
+    width: 100%;
+}
+
+.chart-wrapper-doughnut {
+    position: relative;
+    height: 300px;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+@media (max-width: 900px) {
+    .stats-charts-grid {
+        grid-template-columns: 1fr;
+    }
+}

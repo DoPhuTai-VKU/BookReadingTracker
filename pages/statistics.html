@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Thống Kê Đọc Sách - Book Reading Tracker</title>
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Stylesheets -->
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="../css/statistics.css">
+</head>
+<body>
+
+    <div class="app-layout">
+        <!-- SIDEBAR -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="brand-icon">
+                    <i class="fas fa-book-open-reader"></i>
+                </div>
+                <div class="brand-text">
+                    <span class="brand-title">Book Tracker</span>
+                    <span class="brand-subtitle">Thói quen đọc sách</span>
+                </div>
+            </div>
+
+            <div class="sidebar-menu">
+                <span class="menu-label">Menu Chính</span>
+                <a href="dashboard.html" class="nav-item">
+                    <i class="fas fa-chart-pie"></i>
+                    <span>Dashboard</span>
+                </a>
+                <a href="books.html" class="nav-item">
+                    <i class="fas fa-book-bookmark"></i>
+                    <span>Quản lý sách</span>
+                </a>
+                <a href="reading-history.html" class="nav-item">
+                    <i class="fas fa-clock-rotate-left"></i>
+                    <span>Lịch sử đọc</span>
+                </a>
+                <a href="statistics.html" class="nav-item active">
+                    <i class="fas fa-chart-column"></i>
+                    <span>Thống kê</span>
+                </a>
+
+                <span class="menu-label" style="margin-top: 1rem;">Tài khoản</span>
+                <a href="profile.html" class="nav-item">
+                    <i class="fas fa-user-gear"></i>
+                    <span>Thông tin cá nhân</span>
+                </a>
+            </div>
+
+            <div class="sidebar-footer">
+                <div class="user-mini-card">
+                    <div id="sidebarUserAvatar" class="user-mini-avatar">U</div>
+                    <div class="user-mini-info">
+                        <div id="sidebarUserName" class="user-mini-name">Đang tải...</div>
+                        <div id="sidebarUserEmail" class="user-mini-email">user@email.com</div>
+                    </div>
+                </div>
+                <button type="button" class="btn-logout">
+                    <i class="fas fa-right-from-bracket"></i> Đăng xuất
+                </button>
+            </div>
+        </aside>
+
+        <!-- MAIN WRAPPER -->
+        <div class="main-wrapper">
+            <!-- HEADER -->
+            <header class="main-header">
+                <div class="header-left">
+                    <button type="button" id="btnMenuToggle" class="btn-menu-toggle" aria-label="Mở Menu">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                    <h1 class="page-headline">Thống kê & Phân tích</h1>
+                </div>
+
+                <div class="header-right">
+                    <div class="header-user">
+                        <div id="headerUserAvatar" class="header-user-avatar">U</div>
+                        <span id="headerUserName" class="header-user-name">Đang tải...</span>
+                    </div>
+                </div>
+            </header>
+
+            <!-- PAGE CONTAINER -->
+            <main class="page-container">
+                <!-- Page Top Header -->
+                <div class="content-header">
+                    <div>
+                        <h2 class="content-header-title">Báo cáo thói quen đọc sách</h2>
+                        <p class="content-header-subtitle">Theo dõi các chỉ số định lượng và trực quan hóa thói quen đọc sách của bạn</p>
+                    </div>
+                </div>
+
+                <!-- Summary Cards -->
+                <div class="stats-summary-grid">
+                    <div class="card" style="padding: 1.25rem;">
+                        <div style="font-size: 0.8rem; font-weight: 700; color: var(--text-secondary); text-transform: uppercase;">
+                            <i class="fas fa-book-open" style="color: var(--primary); margin-right: 4px;"></i> Tổng trang đã đọc
+                        </div>
+                        <div id="statTotalPages" style="font-size: 1.85rem; font-weight: 800; color: var(--text-primary); margin-top: 0.35rem;">0</div>
+                    </div>
+
+                    <div class="card" style="padding: 1.25rem;">
+                        <div style="font-size: 0.8rem; font-weight: 700; color: var(--text-secondary); text-transform: uppercase;">
+                            <i class="fas fa-gauge-high" style="color: var(--secondary); margin-right: 4px;"></i> Trung bình / ngày đọc
+                        </div>
+                        <div id="statAvgPages" style="font-size: 1.85rem; font-weight: 800; color: var(--text-primary); margin-top: 0.35rem;">0 trang</div>
+                    </div>
+
+                    <div class="card" style="padding: 1.25rem;">
+                        <div style="font-size: 0.8rem; font-weight: 700; color: var(--text-secondary); text-transform: uppercase;">
+                            <i class="fas fa-calendar-check" style="color: var(--accent); margin-right: 4px;"></i> Số ngày đọc sách
+                        </div>
+                        <div id="statReadingDays" style="font-size: 1.85rem; font-weight: 800; color: var(--text-primary); margin-top: 0.35rem;">0 ngày</div>
+                    </div>
+
+                    <div class="card" style="padding: 1.25rem;">
+                        <div style="font-size: 0.8rem; font-weight: 700; color: var(--text-secondary); text-transform: uppercase;">
+                            <i class="fas fa-trophy" style="color: var(--success); margin-right: 4px;"></i> Tỷ lệ hoàn thành
+                        </div>
+                        <div id="statCompletionRate" style="font-size: 1.85rem; font-weight: 800; color: var(--text-primary); margin-top: 0.35rem;">0%</div>
+                    </div>
+                </div>
+
+                <!-- Charts Grid (2 columns) -->
+                <div class="stats-charts-grid">
+                    <!-- 1. Biểu đồ cột: Số trang đã đọc theo ngày -->
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">
+                                <i class="fas fa-chart-column" style="color: var(--primary);"></i>
+                                Số trang đã đọc theo ngày
+                            </h3>
+                        </div>
+                        <div class="card-body">
+                            <div id="chartPagesByDayContainer" class="chart-wrapper">
+                                <canvas id="chartPagesByDay"></canvas>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 2. Biểu đồ tròn: Tỷ lệ sách theo thể loại -->
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">
+                                <i class="fas fa-chart-pie" style="color: var(--secondary);"></i>
+                                Tỷ lệ sách theo thể loại
+                            </h3>
+                        </div>
+                        <div class="card-body">
+                            <div id="chartCategoryContainer" class="chart-wrapper-doughnut">
+                                <canvas id="chartBooksByCategory"></canvas>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 3. Biểu đồ thanh ngang: Tiến độ hoàn thành từng cuốn sách -->
+                    <div class="card stats-full-chart">
+                        <div class="card-header">
+                            <h3 class="card-title">
+                                <i class="fas fa-bars-progress" style="color: var(--success);"></i>
+                                Tiến độ hoàn thành từng cuốn sách (%)
+                            </h3>
+                        </div>
+                        <div class="card-body">
+                            <div id="chartProgressContainer" class="chart-wrapper" style="height: 360px;">
+                                <canvas id="chartBookProgress"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="../js/storage.js"></script>
+    <script src="../js/data.js"></script>
+    <script src="../js/main.js"></script>
+    <script src="../js/statistics.js"></script>
+</body>
+</html>

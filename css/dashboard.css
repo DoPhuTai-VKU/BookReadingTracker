@@ -1,0 +1,223 @@
+/* ===================================================================
+   DASHBOARD STYLES (css/dashboard.css)
+   =================================================================== */
+
+/* STATS GRID */
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+    gap: 1.25rem;
+    margin-bottom: 2rem;
+}
+
+.stat-card {
+    background-color: var(--bg-card);
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--border-color);
+    padding: 1.35rem 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 1.25rem;
+    box-shadow: var(--shadow-card);
+    transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.stat-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+}
+
+.stat-icon {
+    width: 52px;
+    height: 52px;
+    border-radius: var(--radius-md);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.4rem;
+    flex-shrink: 0;
+}
+
+.stat-icon.books {
+    background: #eef2ff;
+    color: #4f46e5;
+}
+
+.stat-icon.completed {
+    background: #ecfdf5;
+    color: #10b981;
+}
+
+.stat-icon.pages {
+    background: #eff6ff;
+    color: #0284c7;
+}
+
+.stat-icon.days {
+    background: #fffbeb;
+    color: #d97706;
+}
+
+.stat-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.stat-label {
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+}
+
+.stat-value {
+    font-size: 1.75rem;
+    font-weight: 800;
+    color: var(--text-primary);
+    line-height: 1.2;
+    margin-top: 0.2rem;
+}
+
+/* DASHBOARD MAIN GRID */
+.dashboard-grid {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+@media (max-width: 1024px) {
+    .dashboard-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+.chart-card-body {
+    position: relative;
+    height: 320px;
+    width: 100%;
+}
+
+/* RECENT READING BOOKS IN DASHBOARD */
+.book-mini-item {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.85rem 0;
+    border-bottom: 1px solid var(--border-light);
+}
+
+.book-mini-item:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+}
+
+.book-mini-icon {
+    width: 40px;
+    height: 48px;
+    background: linear-gradient(135deg, #e0e7ff, #c7d2fe);
+    color: var(--primary);
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.1rem;
+    flex-shrink: 0;
+}
+
+.book-mini-details {
+    flex: 1;
+    min-width: 0;
+}
+
+.book-mini-title {
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.book-mini-author {
+    font-size: 0.78rem;
+    color: var(--text-muted);
+    margin-bottom: 0.35rem;
+}
+
+/* QUICK ACTION BANNER */
+.welcome-banner {
+    background: linear-gradient(135deg, #4f46e5 0%, #3730a3 100%);
+    color: #ffffff;
+    border-radius: var(--radius-lg);
+    padding: 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1.75rem;
+    box-shadow: 0 10px 20px -5px rgba(79, 70, 229, 0.3);
+    position: relative;
+    overflow: hidden;
+}
+
+.welcome-banner::after {
+    content: '';
+    position: absolute;
+    right: -20px;
+    bottom: -40px;
+    width: 200px;
+    height: 200px;
+    background: rgba(255, 255, 255, 0.08);
+    border-radius: 50%;
+    pointer-events: none;
+}
+
+.welcome-text h2 {
+    font-size: 1.5rem;
+    font-weight: 800;
+    margin-bottom: 0.4rem;
+}
+
+.welcome-text p {
+    font-size: 0.92rem;
+    color: #c7d2fe;
+    max-width: 500px;
+}
+
+.welcome-actions {
+    display: flex;
+    gap: 0.75rem;
+    position: relative;
+    z-index: 2;
+}
+
+.btn-banner {
+    background: #ffffff;
+    color: var(--primary);
+    font-weight: 700;
+    padding: 0.65rem 1.25rem;
+    border-radius: var(--radius-sm);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    transition: all var(--transition-fast);
+}
+
+.btn-banner:hover {
+    background: #f8fafc;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+}
+
+.btn-banner-outline {
+    background: rgba(255, 255, 255, 0.15);
+    color: #ffffff;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    font-weight: 600;
+    padding: 0.65rem 1.25rem;
+    border-radius: var(--radius-sm);
+    transition: all var(--transition-fast);
+}
+
+.btn-banner-outline:hover {
+    background: rgba(255, 255, 255, 0.25);
+}

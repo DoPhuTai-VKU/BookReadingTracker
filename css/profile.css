@@ -1,0 +1,75 @@
+/* ===================================================================
+   PROFILE STYLES (css/profile.css)
+   =================================================================== */
+
+.profile-layout {
+    display: grid;
+    grid-template-columns: 320px 1fr;
+    gap: 1.75rem;
+}
+
+@media (max-width: 900px) {
+    .profile-layout {
+        grid-template-columns: 1fr;
+    }
+}
+
+.profile-avatar-card {
+    text-align: center;
+    padding: 2.5rem 1.5rem;
+}
+
+.profile-large-avatar {
+    width: 96px;
+    height: 96px;
+    border-radius: var(--radius-full);
+    background: linear-gradient(135deg, var(--primary), #818cf8);
+    color: white;
+    font-size: 2.2rem;
+    font-weight: 800;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1.25rem;
+    box-shadow: 0 10px 20px rgba(79, 70, 229, 0.25);
+}
+
+.profile-name {
+    font-size: 1.3rem;
+    font-weight: 800;
+    color: var(--text-primary);
+    margin-bottom: 0.25rem;
+}
+
+.profile-email {
+    font-size: 0.88rem;
+    color: var(--text-secondary);
+    margin-bottom: 1.5rem;
+}
+
+.profile-stats-mini {
+    display: flex;
+    justify-content: space-around;
+    padding: 1.25rem 0;
+    border-top: 1px solid var(--border-light);
+    border-bottom: 1px solid var(--border-light);
+    margin-bottom: 1.5rem;
+}
+
+.profile-stat-box {
+    text-align: center;
+}
+
+.profile-stat-val {
+    font-size: 1.25rem;
+    font-weight: 800;
+    color: var(--primary);
+}
+
+.profile-stat-lbl {
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    font-weight: 600;
+    margin-top: 0.2rem;
+}

@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lịch Sử Đọc Sách - Book Reading Tracker</title>
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <!-- Stylesheets -->
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="../css/reading-history.css">
+</head>
+<body>
+
+    <div class="app-layout">
+        <!-- SIDEBAR -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="brand-icon">
+                    <i class="fas fa-book-open-reader"></i>
+                </div>
+                <div class="brand-text">
+                    <span class="brand-title">Book Tracker</span>
+                    <span class="brand-subtitle">Thói quen đọc sách</span>
+                </div>
+            </div>
+
+            <div class="sidebar-menu">
+                <span class="menu-label">Menu Chính</span>
+                <a href="dashboard.html" class="nav-item">
+                    <i class="fas fa-chart-pie"></i>
+                    <span>Dashboard</span>
+                </a>
+                <a href="books.html" class="nav-item">
+                    <i class="fas fa-book-bookmark"></i>
+                    <span>Quản lý sách</span>
+                </a>
+                <a href="reading-history.html" class="nav-item active">
+                    <i class="fas fa-clock-rotate-left"></i>
+                    <span>Lịch sử đọc</span>
+                </a>
+                <a href="statistics.html" class="nav-item">
+                    <i class="fas fa-chart-column"></i>
+                    <span>Thống kê</span>
+                </a>
+
+                <span class="menu-label" style="margin-top: 1rem;">Tài khoản</span>
+                <a href="profile.html" class="nav-item">
+                    <i class="fas fa-user-gear"></i>
+                    <span>Thông tin cá nhân</span>
+                </a>
+            </div>
+
+            <div class="sidebar-footer">
+                <div class="user-mini-card">
+                    <div id="sidebarUserAvatar" class="user-mini-avatar">U</div>
+                    <div class="user-mini-info">
+                        <div id="sidebarUserName" class="user-mini-name">Đang tải...</div>
+                        <div id="sidebarUserEmail" class="user-mini-email">user@email.com</div>
+                    </div>
+                </div>
+                <button type="button" class="btn-logout">
+                    <i class="fas fa-right-from-bracket"></i> Đăng xuất
+                </button>
+            </div>
+        </aside>
+
+        <!-- MAIN WRAPPER -->
+        <div class="main-wrapper">
+            <!-- HEADER -->
+            <header class="main-header">
+                <div class="header-left">
+                    <button type="button" id="btnMenuToggle" class="btn-menu-toggle" aria-label="Mở Menu">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                    <h1 class="page-headline">Nhật ký đọc sách</h1>
+                </div>
+
+                <div class="header-right">
+                    <div class="header-user">
+                        <div id="headerUserAvatar" class="header-user-avatar">U</div>
+                        <span id="headerUserName" class="header-user-name">Đang tải...</span>
+                    </div>
+                </div>
+            </header>
+
+            <!-- PAGE CONTAINER -->
+            <main class="page-container">
+                <!-- Content Top Header -->
+                <div class="content-header">
+                    <div>
+                        <h2 class="content-header-title">Lịch sử quá trình đọc <span id="historyCountBadge" class="badge badge-category" style="font-size: 0.85rem; vertical-align: middle;">0 bản ghi</span></h2>
+                        <p class="content-header-subtitle">Theo dõi từng lần đọc sách để hình thành thói quen kỷ luật mỗi ngày</p>
+                    </div>
+                    <button type="button" class="btn btn-primary" onclick="openAddLogModal()">
+                        <i class="fas fa-plus"></i> Ghi nhận đọc sách
+                    </button>
+                </div>
+
+                <!-- Toolbar: Filter by Book and Date -->
+                <div class="history-toolbar">
+                    <div class="history-filters">
+                        <select id="bookFilterSelect" class="form-control" style="width: auto; min-width: 240px; cursor: pointer;">
+                            <option value="all">Tất cả các cuốn sách</option>
+                        </select>
+
+                        <div class="date-filter-group">
+                            <span style="font-size: 0.85rem; color: var(--text-secondary); font-weight: 500;">Ngày:</span>
+                            <input type="date" id="dateFilterInput" class="date-input">
+                        </div>
+
+                        <button type="button" id="btnResetFilter" class="btn btn-secondary btn-sm" title="Đặt lại bộ lọc">
+                            <i class="fas fa-rotate-left"></i> Đặt lại
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Table Card -->
+                <div class="card">
+                    <div class="card-body" style="padding: 0;">
+                        <div class="table-responsive">
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>Tên sách</th>
+                                        <th>Ngày đọc</th>
+                                        <th>Số trang</th>
+                                        <th>Ghi chú cảm nghĩ</th>
+                                        <th style="width: 100px;">Thao tác</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="readingHistoryTableBody">
+                                    <!-- Rendered by reading-history.js -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- ==========================================
+         MODAL: THÊM LƯỢT ĐỌC SÁCH
+         ========================================== -->
+    <div id="addLogModal" class="modal-backdrop">
+        <div class="modal-box">
+            <div class="modal-header">
+                <h3 class="modal-title"><i class="fas fa-feather-pointed" style="color: var(--primary);"></i> Ghi Nhận Lần Đọc Sách</h3>
+                <button type="button" class="modal-close" data-modal-close aria-label="Đóng"><i class="fas fa-times"></i></button>
+            </div>
+            <form id="addLogForm">
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label for="addLogBookId" class="form-label">Chọn cuốn sách <span class="required">*</span></label>
+                        <select id="addLogBookId" class="form-control" required>
+                            <!-- Rendered by js -->
+                        </select>
+                        <div id="addRemainingHint" class="hint-remaining-pages"></div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="addLogDate" class="form-label">Ngày đọc <span class="required">*</span></label>
+                        <input type="date" id="addLogDate" class="form-control" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="addLogPages" class="form-label">Số trang đã đọc hôm nay <span class="required">*</span></label>
+                        <input type="number" id="addLogPages" class="form-control" placeholder="Ví dụ: 30" min="1" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="addLogNote" class="form-label">Ghi chú hoặc bài học tâm đắc</label>
+                        <textarea id="addLogNote" class="form-control" rows="3" placeholder="Ghi lại cảm xúc hoặc điểm hay bạn vừa đọc..."></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-modal-close>Hủy bỏ</button>
+                    <button type="submit" class="btn btn-primary"><i class="fas fa-check"></i> Lưu vào nhật ký</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- ==========================================
+         MODAL: CHỈNH SỬA LƯỢT ĐỌC SÁCH
+         ========================================== -->
+    <div id="editLogModal" class="modal-backdrop">
+        <div class="modal-box">
+            <div class="modal-header">
+                <h3 class="modal-title"><i class="fas fa-pen-to-square" style="color: var(--primary);"></i> Sửa Nhật Ký Đọc</h3>
+                <button type="button" class="modal-close" data-modal-close aria-label="Đóng"><i class="fas fa-times"></i></button>
+            </div>
+            <form id="editLogForm">
+                <input type="hidden" id="editLogId">
+                <input type="hidden" id="editLogBookId">
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label class="form-label">Cuốn sách</label>
+                        <div id="editLogBookTitle" style="font-weight: 700; color: var(--primary); padding: 0.4rem 0;"></div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="editLogDate" class="form-label">Ngày đọc <span class="required">*</span></label>
+                        <input type="date" id="editLogDate" class="form-control" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="editLogPages" class="form-label">Số trang đã đọc <span class="required">*</span></label>
+                        <input type="number" id="editLogPages" class="form-control" min="1" required>
+                        <div id="editRemainingHint" class="hint-remaining-pages"></div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="editLogNote" class="form-label">Ghi chú</label>
+                        <textarea id="editLogNote" class="form-control" rows="3"></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-modal-close>Hủy bỏ</button>
+                    <button type="submit" class="btn btn-primary"><i class="fas fa-check"></i> Cập nhật</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- ==========================================
+         MODAL: XÁC NHẬN XÓA LƯỢT ĐỌC
+         ========================================== -->
+    <div id="deleteLogModal" class="modal-backdrop">
+        <div class="modal-box" style="max-width: 440px;">
+            <div class="modal-header">
+                <h3 class="modal-title" style="color: var(--danger);"><i class="fas fa-triangle-exclamation"></i> Xác Nhận Xóa Bản Ghi</h3>
+                <button type="button" class="modal-close" data-modal-close aria-label="Đóng"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="modal-body">
+                <p id="deleteLogMessage" style="color: var(--text-secondary); line-height: 1.6;"></p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-modal-close>Không xóa</button>
+                <button type="button" id="btnConfirmDeleteLog" class="btn btn-danger"><i class="fas fa-trash-can"></i> Xóa bản ghi</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="../js/storage.js"></script>
+    <script src="../js/data.js"></script>
+    <script src="../js/main.js"></script>
+    <script src="../js/reading-history.js"></script>
+</body>
+</html>

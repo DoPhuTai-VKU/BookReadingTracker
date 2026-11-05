@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Thông Tin Cá Nhân - Book Reading Tracker</title>
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <!-- Stylesheets -->
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="../css/profile.css">
+</head>
+<body>
+
+    <div class="app-layout">
+        <!-- SIDEBAR -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="brand-icon">
+                    <i class="fas fa-book-open-reader"></i>
+                </div>
+                <div class="brand-text">
+                    <span class="brand-title">Book Tracker</span>
+                    <span class="brand-subtitle">Thói quen đọc sách</span>
+                </div>
+            </div>
+
+            <div class="sidebar-menu">
+                <span class="menu-label">Menu Chính</span>
+                <a href="dashboard.html" class="nav-item">
+                    <i class="fas fa-chart-pie"></i>
+                    <span>Dashboard</span>
+                </a>
+                <a href="books.html" class="nav-item">
+                    <i class="fas fa-book-bookmark"></i>
+                    <span>Quản lý sách</span>
+                </a>
+                <a href="reading-history.html" class="nav-item">
+                    <i class="fas fa-clock-rotate-left"></i>
+                    <span>Lịch sử đọc</span>
+                </a>
+                <a href="statistics.html" class="nav-item">
+                    <i class="fas fa-chart-column"></i>
+                    <span>Thống kê</span>
+                </a>
+
+                <span class="menu-label" style="margin-top: 1rem;">Tài khoản</span>
+                <a href="profile.html" class="nav-item active">
+                    <i class="fas fa-user-gear"></i>
+                    <span>Thông tin cá nhân</span>
+                </a>
+            </div>
+
+            <div class="sidebar-footer">
+                <div class="user-mini-card">
+                    <div id="sidebarUserAvatar" class="user-mini-avatar">U</div>
+                    <div class="user-mini-info">
+                        <div id="sidebarUserName" class="user-mini-name">Đang tải...</div>
+                        <div id="sidebarUserEmail" class="user-mini-email">user@email.com</div>
+                    </div>
+                </div>
+                <button type="button" class="btn-logout">
+                    <i class="fas fa-right-from-bracket"></i> Đăng xuất
+                </button>
+            </div>
+        </aside>
+
+        <!-- MAIN WRAPPER -->
+        <div class="main-wrapper">
+            <!-- HEADER -->
+            <header class="main-header">
+                <div class="header-left">
+                    <button type="button" id="btnMenuToggle" class="btn-menu-toggle" aria-label="Mở Menu">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                    <h1 class="page-headline">Hồ sơ người dùng</h1>
+                </div>
+
+                <div class="header-right">
+                    <div class="header-user">
+                        <div id="headerUserAvatar" class="header-user-avatar">U</div>
+                        <span id="headerUserName" class="header-user-name">Đang tải...</span>
+                    </div>
+                </div>
+            </header>
+
+            <!-- PAGE CONTAINER -->
+            <main class="page-container">
+                <!-- Content Header -->
+                <div class="content-header">
+                    <div>
+                        <h2 class="content-header-title">Quản lý thông tin tài khoản</h2>
+                        <p class="content-header-subtitle">Xem và tùy chỉnh thông tin tài khoản cá nhân của bạn</p>
+                    </div>
+                </div>
+
+                <div class="profile-layout">
+                    <!-- Left: Profile Overview Card -->
+                    <div class="card profile-avatar-card">
+                        <div id="profileLargeAvatar" class="profile-large-avatar">U</div>
+                        <h3 id="profileCardName" class="profile-name">Đang tải...</h3>
+                        <p id="profileCardEmail" class="profile-email">user@email.com</p>
+
+                        <div class="profile-stats-mini">
+                            <div class="profile-stat-box">
+                                <div id="profileBooksCount" class="profile-stat-val">0</div>
+                                <div class="profile-stat-lbl">Cuốn sách</div>
+                            </div>
+                            <div class="profile-stat-box">
+                                <div id="profilePagesCount" class="profile-stat-val">0</div>
+                                <div class="profile-stat-lbl">Trang đã đọc</div>
+                            </div>
+                        </div>
+
+                        <button type="button" id="btnLogout" class="btn btn-logout" style="width: 100%; padding: 0.75rem;">
+                            <i class="fas fa-arrow-right-from-bracket"></i> Đăng xuất tài khoản
+                        </button>
+                    </div>
+
+                    <!-- Right: Form Edit Profile -->
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">
+                                <i class="fas fa-id-badge" style="color: var(--primary);"></i>
+                                Chi tiết tài khoản
+                            </h3>
+                        </div>
+                        <div class="card-body">
+                            <form id="profileForm">
+                                <div class="form-group">
+                                    <label for="profileFullName" class="form-label">
+                                        Họ và tên <span class="required">*</span>
+                                    </label>
+                                    <div class="input-group">
+                                        <i class="fas fa-user input-icon-left"></i>
+                                        <input type="text" id="profileFullName" class="form-control with-icon-left" required>
+                                    </div>
+                                    <span style="font-size: 0.78rem; color: var(--text-muted); margin-top: 0.25rem; display: block;">
+                                        Tên này sẽ hiển thị ở góc trên và thanh bên trái.
+                                    </span>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="profileEmail" class="form-label">Địa chỉ Email</label>
+                                    <div class="input-group">
+                                        <i class="fas fa-envelope input-icon-left"></i>
+                                        <input type="email" id="profileEmail" class="form-control with-icon-left" readonly style="background-color: var(--bg-main); cursor: not-allowed;">
+                                    </div>
+                                    <span style="font-size: 0.78rem; color: var(--text-muted); margin-top: 0.25rem; display: block;">
+                                        Email dùng để đăng nhập và định danh tài khoản.
+                                    </span>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="profileCreatedAt" class="form-label">Ngày tạo tài khoản</label>
+                                    <div class="input-group">
+                                        <i class="fas fa-calendar-day input-icon-left"></i>
+                                        <input type="text" id="profileCreatedAt" class="form-control with-icon-left" readonly style="background-color: var(--bg-main); cursor: not-allowed;">
+                                    </div>
+                                </div>
+
+                                <div style="display: flex; justify-content: flex-end; margin-top: 1.5rem;">
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="fas fa-floppy-disk"></i> Lưu thay đổi
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="../js/storage.js"></script>
+    <script src="../js/data.js"></script>
+    <script src="../js/main.js"></script>
+    <script src="../js/profile.js"></script>
+</body>
+</html>

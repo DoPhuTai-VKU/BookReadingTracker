@@ -1,0 +1,59 @@
+/* ===================================================================
+   READING HISTORY STYLES (css/reading-history.css)
+   =================================================================== */
+
+.history-toolbar {
+    background-color: var(--bg-card);
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--border-color);
+    padding: 1rem 1.25rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 1.75rem;
+    flex-wrap: wrap;
+    box-shadow: var(--shadow-card);
+}
+
+.history-filters {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+}
+
+.date-filter-group {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.date-input {
+    padding: 0.6rem 0.85rem;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-sm);
+    font-size: 0.88rem;
+    color: var(--text-secondary);
+    outline: none;
+    background: #ffffff;
+}
+
+.date-input:focus {
+    border-color: var(--primary);
+}
+
+.note-cell {
+    max-width: 320px;
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    line-height: 1.4;
+    word-break: break-word;
+}
+
+.hint-remaining-pages {
+    margin-top: 0.4rem;
+    font-size: 0.82rem;
+    color: var(--primary);
+    font-weight: 500;
+}

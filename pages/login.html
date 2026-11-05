@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Đăng Nhập - Book Reading Tracker</title>
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <!-- CSS Styles -->
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="../css/auth.css">
+</head>
+<body class="auth-body">
+
+    <div class="auth-container">
+        <!-- Logo & Title -->
+        <div class="auth-header">
+            <div class="auth-logo">
+                <i class="fas fa-book-open-reader"></i>
+            </div>
+            <h1 class="auth-title">Chào mừng trở lại!</h1>
+            <p class="auth-desc">Đăng nhập để tiếp tục hành trình đọc sách của bạn</p>
+        </div>
+
+        <!-- Alert Notification -->
+        <div id="authAlert" class="auth-alert"></div>
+
+        <!-- Login Form -->
+        <form id="loginForm" novalidate>
+            <div class="form-group">
+                <label for="loginEmail" class="form-label">
+                    Email <span class="required">*</span>
+                </label>
+                <div class="input-group">
+                    <i class="fas fa-envelope input-icon-left"></i>
+                    <input type="email" id="loginEmail" class="form-control with-icon-left" placeholder="nhapemail@cuaban.com" required autocomplete="email">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="loginPassword" class="form-label">
+                    Mật khẩu <span class="required">*</span>
+                </label>
+                <div class="input-group">
+                    <i class="fas fa-lock input-icon-left"></i>
+                    <input type="password" id="loginPassword" class="form-control with-icon-left" placeholder="Nhập mật khẩu" required autocomplete="current-password">
+                    <button type="button" class="btn-toggle-password" title="Ẩn/Hiện mật khẩu" aria-label="Hiện mật khẩu">
+                        <i class="fas fa-eye"></i>
+                    </button>
+                </div>
+            </div>
+
+            <button type="submit" class="btn btn-primary btn-auth-submit">
+                <i class="fas fa-right-to-bracket"></i> Đăng Nhập
+            </button>
+        </form>
+
+        <!-- Quick Demo Login -->
+        <div class="auth-divider">
+            <span>Hoặc thử nghiệm nhanh</span>
+        </div>
+
+        <button type="button" id="btnDemoLogin" class="btn-demo-fill">
+            <i class="fas fa-wand-magic-sparkles"></i> Đăng nhập tài khoản mẫu (Demo)
+        </button>
+
+        <!-- Footer Link -->
+        <div class="auth-footer">
+            Chưa có tài khoản? <a href="register.html">Đăng ký ngay</a>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="../js/storage.js"></script>
+    <script src="../js/data.js"></script>
+    <script src="../js/auth.js"></script>
+</body>
+</html>

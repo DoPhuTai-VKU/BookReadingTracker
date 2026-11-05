@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Book Reading Tracker</title>
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Stylesheets -->
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="../css/dashboard.css">
+</head>
+<body>
+
+    <div class="app-layout">
+        <!-- SIDEBAR -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="brand-icon">
+                    <i class="fas fa-book-open-reader"></i>
+                </div>
+                <div class="brand-text">
+                    <span class="brand-title">Book Tracker</span>
+                    <span class="brand-subtitle">Thói quen đọc sách</span>
+                </div>
+            </div>
+
+            <div class="sidebar-menu">
+                <span class="menu-label">Menu Chính</span>
+                <a href="dashboard.html" class="nav-item active">
+                    <i class="fas fa-chart-pie"></i>
+                    <span>Dashboard</span>
+                </a>
+                <a href="books.html" class="nav-item">
+                    <i class="fas fa-book-bookmark"></i>
+                    <span>Quản lý sách</span>
+                </a>
+                <a href="reading-history.html" class="nav-item">
+                    <i class="fas fa-clock-rotate-left"></i>
+                    <span>Lịch sử đọc</span>
+                </a>
+                <a href="statistics.html" class="nav-item">
+                    <i class="fas fa-chart-column"></i>
+                    <span>Thống kê</span>
+                </a>
+
+                <span class="menu-label" style="margin-top: 1rem;">Tài khoản</span>
+                <a href="profile.html" class="nav-item">
+                    <i class="fas fa-user-gear"></i>
+                    <span>Thông tin cá nhân</span>
+                </a>
+            </div>
+
+            <div class="sidebar-footer">
+                <div class="user-mini-card">
+                    <div id="sidebarUserAvatar" class="user-mini-avatar">U</div>
+                    <div class="user-mini-info">
+                        <div id="sidebarUserName" class="user-mini-name">Đang tải...</div>
+                        <div id="sidebarUserEmail" class="user-mini-email">user@email.com</div>
+                    </div>
+                </div>
+                <button type="button" class="btn-logout">
+                    <i class="fas fa-right-from-bracket"></i> Đăng xuất
+                </button>
+            </div>
+        </aside>
+
+        <!-- MAIN WRAPPER -->
+        <div class="main-wrapper">
+            <!-- HEADER -->
+            <header class="main-header">
+                <div class="header-left">
+                    <button type="button" id="btnMenuToggle" class="btn-menu-toggle" aria-label="Mở Menu">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                    <h1 class="page-headline">Tổng quan (Dashboard)</h1>
+                </div>
+
+                <div class="header-right">
+                    <div class="header-user">
+                        <div id="headerUserAvatar" class="header-user-avatar">U</div>
+                        <span id="headerUserName" class="header-user-name">Đang tải...</span>
+                    </div>
+                </div>
+            </header>
+
+            <!-- PAGE CONTENT CONTAINER -->
+            <main class="page-container">
+                <!-- Welcome Banner -->
+                <div class="welcome-banner">
+                    <div class="welcome-text">
+                        <h2>Xin chào, <span id="welcomeUserName">bạn</span>! 📚</h2>
+                        <p>Mỗi trang sách mở ra là một chân trời tri thức mới. Hãy duy trì thói quen đọc sách mỗi ngày nhé!</p>
+                    </div>
+                    <div class="welcome-actions">
+                        <a href="reading-history.html" class="btn-banner">
+                            <i class="fas fa-feather-pointed"></i> Ghi nhận đọc sách
+                        </a>
+                        <a href="books.html" class="btn-banner-outline">
+                            <i class="fas fa-plus"></i> Thêm sách mới
+                        </a>
+                    </div>
+                </div>
+
+                <!-- 4 Overview Stats Cards -->
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon books">
+                            <i class="fas fa-book"></i>
+                        </div>
+                        <div class="stat-info">
+                            <div class="stat-label">Sách đang theo dõi</div>
+                            <div id="statTotalBooks" class="stat-value">0</div>
+                        </div>
+                    </div>
+
+                    <div class="stat-card">
+                        <div class="stat-icon completed">
+                            <i class="fas fa-circle-check"></i>
+                        </div>
+                        <div class="stat-info">
+                            <div class="stat-label">Sách đã hoàn thành</div>
+                            <div id="statCompletedBooks" class="stat-value">0</div>
+                        </div>
+                    </div>
+
+                    <div class="stat-card">
+                        <div class="stat-icon pages">
+                            <i class="fas fa-file-lines"></i>
+                        </div>
+                        <div class="stat-info">
+                            <div class="stat-label">Tổng số trang đã đọc</div>
+                            <div id="statTotalPages" class="stat-value">0</div>
+                        </div>
+                    </div>
+
+                    <div class="stat-card">
+                        <div class="stat-icon days">
+                            <i class="fas fa-calendar-check"></i>
+                        </div>
+                        <div class="stat-info">
+                            <div class="stat-label">Số ngày có đọc sách</div>
+                            <div id="statReadingDays" class="stat-value">0</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Main Grid: Chart & Currently Reading -->
+                <div class="dashboard-grid">
+                    <!-- Chart Column -->
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="card-title">
+                                <i class="fas fa-chart-simple" style="color: var(--primary);"></i>
+                                <span>Tiến độ đọc sách theo ngày</span>
+                            </div>
+                            <span class="badge badge-category">Gần đây</span>
+                        </div>
+                        <div class="card-body">
+                            <div class="chart-card-body">
+                                <canvas id="readingTrendChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Currently Reading Column -->
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="card-title">
+                                <i class="fas fa-bookmark" style="color: var(--accent);"></i>
+                                <span>Đang đọc</span>
+                            </div>
+                            <a href="books.html" class="btn btn-sm btn-secondary">Xem tất cả</a>
+                        </div>
+                        <div class="card-body">
+                            <div id="currentlyReadingList">
+                                <!-- Dynamic Rendered by dashboard.js -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Recent Reading Logs Table -->
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">
+                            <i class="fas fa-history" style="color: var(--secondary);"></i>
+                            <span>Hoạt động đọc gần đây</span>
+                        </div>
+                        <a href="reading-history.html" class="btn btn-sm btn-secondary">Xem lịch sử</a>
+                    </div>
+                    <div class="card-body" style="padding: 0;">
+                        <div class="table-responsive">
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>Tên sách</th>
+                                        <th>Ngày đọc</th>
+                                        <th>Số trang</th>
+                                        <th>Ghi chú</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="recentLogsTableBody">
+                                    <!-- Dynamic Rendered by dashboard.js -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="../js/storage.js"></script>
+    <script src="../js/data.js"></script>
+    <script src="../js/main.js"></script>
+    <script src="../js/dashboard.js"></script>
+</body>
+</html>
