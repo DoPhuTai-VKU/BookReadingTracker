@@ -1,8 +1,3 @@
-/**
- * storage.js - Tầng dịch vụ API kết nối Backend Flask & MySQL
- * Viết theo phong cách sinh viên làm đồ án: rõ ràng, dễ hiểu, dùng fetch API.
- */
-
 const StorageService = {
     // ==========================================
     // 1. QUẢN LÝ PHIÊN ĐĂNG NHẬP (SESSION)
@@ -172,7 +167,7 @@ const StorageService = {
     },
 
     // ==========================================
-    // 4. CÁC API NHẬT KÝ ĐỌC SÁCH (READING LOG API)
+    // 4. CÁC API NHẬT KÝ ĐỌC SÁCH 
     // ==========================================
     async getReadingHistory() {
         try {
@@ -234,7 +229,7 @@ const StorageService = {
     },
 
     // ==========================================
-    // 5. CÁC API THỐNG KÊ (DASHBOARD & STATS)
+    // 5. CÁC API THỐNG KÊ
     // ==========================================
     async getDashboardStats() {
         try {
@@ -266,5 +261,5 @@ const StorageService = {
     }
 };
 
-// Đưa ra phạm vi toàn cục
+
 window.StorageService = StorageService;

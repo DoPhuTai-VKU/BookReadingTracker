@@ -1,7 +1,3 @@
-/**
- * profile.js - Quản lý trang thông tin cá nhân của người dùng qua API Flask
- */
-
 document.addEventListener('DOMContentLoaded', () => {
     loadUserProfile();
     initProfileForm();
@@ -73,7 +69,7 @@ function initProfileForm() {
 
         if (result && result.success) {
             showToast('Đã cập nhật thông tin cá nhân thành công!', 'success');
-            
+
             // Cập nhật lại giao diện trang profile
             loadUserProfile();
 

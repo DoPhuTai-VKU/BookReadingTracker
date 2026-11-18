@@ -1,9 +1,3 @@
-/**
- * data.js - Dữ liệu mẫu (Mock Data) ban đầu cho hệ thống
- * Cung cấp tài khoản demo và dữ liệu sách, lịch sử đọc mẫu 
- * để người dùng có thể trải nghiệm ngay lập tức.
- */
-
 const DEMO_USER_ID = 'user_demo_001';
 
 const MOCK_DATA = {

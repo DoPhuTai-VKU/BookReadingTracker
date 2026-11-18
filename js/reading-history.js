@@ -1,7 +1,3 @@
-/**
- * reading-history.js - Quản lý lịch sử đọc sách qua API Flask
- */
-
 let allUserLogs = [];
 let userBooksList = [];
 let deleteLogTargetId = null;

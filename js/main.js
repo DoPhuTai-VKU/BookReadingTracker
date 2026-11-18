@@ -1,9 +1,3 @@
-/**
- * main.js - Core UI Controller & App Helpers
- * Xử lý kiểm tra phiên đăng nhập (Route Guard), thanh điều hướng Sidebar, 
- * Header, hiển thị thông tin người dùng, Toast notification, và Modal dialogs.
- */
-
 // Route Guard: Kiểm tra người dùng đã đăng nhập chưa
 (function checkAuthGuard() {
     // Nếu đang ở trang login hoặc register thì auth.js sẽ xử lý
@@ -27,7 +21,7 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 /**
- * Khởi tạo giao diện ứng dụng (Header, Sidebar, User Info)
+    khởi tạo giao diện
  */
 function initAppShell() {
     const currentUser = StorageService.getCurrentUser();

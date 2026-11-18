@@ -1,7 +1,3 @@
-/**
- * statistics.js - Xử lý tính toán thống kê chuyên sâu & vẽ biểu đồ từ API Flask
- */
-
 let chartPagesInstance = null;
 let chartCategoryInstance = null;
 let chartProgressInstance = null;
@@ -118,7 +114,7 @@ function renderCategoryChart(categoryCount) {
 
     const totalBooks = data.reduce((a, b) => a + b, 0);
     const modernPalette = [
-        '#4f46e5', '#06b6d4', '#10b981', '#f59e0b', '#ec4899', 
+        '#4f46e5', '#06b6d4', '#10b981', '#f59e0b', '#ec4899',
         '#8b5cf6', '#14b8a6', '#f97316', '#6366f1', '#64748b'
     ];
 
