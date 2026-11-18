@@ -1,7 +1,3 @@
-/**
- * auth.js - Xử lý Đăng ký, Đăng nhập và Xác thực người dùng
- */
-
 document.addEventListener('DOMContentLoaded', () => {
     // Nếu đã đăng nhập, tự động chuyển về Dashboard
     const currentUser = StorageService.getCurrentUser();
@@ -78,7 +74,7 @@ function initLoginForm() {
     const loginForm = document.getElementById('loginForm');
     if (!loginForm) return;
 
-    loginForm.addEventListener('submit', (e) => {
+    loginForm.addEventListener('submit', async (e) => {
         e.preventDefault();
         clearAuthAlert('authAlert');
 
@@ -88,7 +84,7 @@ function initLoginForm() {
         const email = emailInput.value.trim();
         const password = passwordInput.value;
 
-        // Validation
+        // Validation phía client
         if (!email) {
             setAuthAlert('authAlert', 'Vui lòng nhập địa chỉ email của bạn.');
             emailInput.focus();
@@ -107,20 +103,23 @@ function initLoginForm() {
             return;
         }
 
-        // Kiểm tra tài khoản trong Storage
-        const user = StorageService.findUserByEmail(email);
-        if (!user || user.password !== password) {
-            setAuthAlert('authAlert', 'Email hoặc mật khẩu không chính xác. Vui lòng thử lại!');
-            return;
+        // Gọi Backend API
+        const submitBtn = loginForm.querySelector('button[type="submit"]');
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Đang đăng nhập...';
+
+        const result = await StorageService.login(email, password);
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = '<i class="fas fa-right-to-bracket"></i> Đăng Nhập';
+
+        if (result && result.success) {
+            setAuthAlert('authAlert', 'Đăng nhập thành công! Đang chuyển hướng...', 'success');
+            setTimeout(() => {
+                window.location.href = 'dashboard.html';
+            }, 600);
+        } else {
+            setAuthAlert('authAlert', (result && result.message) || 'Email hoặc mật khẩu không chính xác!');
         }
-
-        // Đăng nhập thành công
-        StorageService.setCurrentUser(user);
-        setAuthAlert('authAlert', 'Đăng nhập thành công! Đang chuyển hướng...', 'success');
-
-        setTimeout(() => {
-            window.location.href = 'dashboard.html';
-        }, 800);
     });
 }
 
@@ -131,7 +130,7 @@ function initRegisterForm() {
     const registerForm = document.getElementById('registerForm');
     if (!registerForm) return;
 
-    registerForm.addEventListener('submit', (e) => {
+    registerForm.addEventListener('submit', async (e) => {
         e.preventDefault();
         clearAuthAlert('authAlert');
 
@@ -145,46 +144,20 @@ function initRegisterForm() {
         const password = passwordInput.value;
         const confirmPassword = confirmPasswordInput.value;
 
-        // Validation
-        if (!fullName) {
-            setAuthAlert('authAlert', 'Vui lòng nhập họ và tên của bạn.');
-            fullNameInput.focus();
-            return;
-        }
-
-        if (fullName.length < 2) {
+        // Validation phía client
+        if (!fullName || fullName.length < 2) {
             setAuthAlert('authAlert', 'Họ và tên phải có ít nhất 2 ký tự.');
             fullNameInput.focus();
             return;
         }
 
-        if (!email) {
-            setAuthAlert('authAlert', 'Vui lòng nhập địa chỉ email.');
-            emailInput.focus();
-            return;
-        }
-
-        if (!isValidEmail(email)) {
+        if (!email || !isValidEmail(email)) {
             setAuthAlert('authAlert', 'Định dạng email không hợp lệ (ví dụ: user@example.com).');
             emailInput.focus();
             return;
         }
 
-        // Kiểm tra email đã được đăng ký hay chưa
-        const existingUser = StorageService.findUserByEmail(email);
-        if (existingUser) {
-            setAuthAlert('authAlert', 'Email này đã được sử dụng. Vui lòng chọn email khác hoặc đăng nhập.');
-            emailInput.focus();
-            return;
-        }
-
-        if (!password) {
-            setAuthAlert('authAlert', 'Vui lòng nhập mật khẩu.');
-            passwordInput.focus();
-            return;
-        }
-
-        if (password.length < 6) {
+        if (!password || password.length < 6) {
             setAuthAlert('authAlert', 'Mật khẩu phải chứa ít nhất 6 ký tự.');
             passwordInput.focus();
             return;
@@ -196,20 +169,22 @@ function initRegisterForm() {
             return;
         }
 
-        // Tạo người dùng mới
-        const newUser = StorageService.createUser({
-            fullName,
-            email,
-            password
-        });
+        // Gọi Backend API đăng ký
+        const submitBtn = registerForm.querySelector('button[type="submit"]');
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Đang tạo tài khoản...';
 
-        if (newUser) {
+        const result = await StorageService.register(fullName, email, password);
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = '<i class="fas fa-user-plus"></i> Đăng Ký Tài Khoản';
+
+        if (result && result.success) {
             setAuthAlert('authAlert', 'Đăng ký tài khoản thành công! Đang chuyển đến trang đăng nhập...', 'success');
             setTimeout(() => {
                 window.location.href = 'login.html';
             }, 1200);
         } else {
-            setAuthAlert('authAlert', 'Không thể tạo tài khoản. Vui lòng thử lại sau.');
+            setAuthAlert('authAlert', (result && result.message) || 'Không thể tạo tài khoản!');
         }
     });
 }
@@ -231,7 +206,6 @@ function initDemoLoginButton() {
 
             const form = document.getElementById('loginForm');
             if (form) {
-                // Tự động submit sau 200ms tạo cảm giác tự nhiên
                 setTimeout(() => {
                     form.dispatchEvent(new Event('submit', { cancelable: true, bubbles: true }));
                 }, 200);

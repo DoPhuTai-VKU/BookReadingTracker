@@ -1,5 +1,5 @@
 /**
- * reading-history.js - Quản lý lịch sử đọc sách (CRUD, Lọc theo sách, Lọc theo ngày)
+ * reading-history.js - Quản lý lịch sử đọc sách qua API Flask
  */
 
 let allUserLogs = [];
@@ -13,14 +13,15 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 /**
- * Tải dữ liệu ban đầu cho trang Lịch sử đọc
+ * Tải dữ liệu ban đầu cho trang Lịch sử đọc từ API
  */
-function loadReadingHistoryPage() {
+async function loadReadingHistoryPage() {
     const currentUser = StorageService.getCurrentUser();
     if (!currentUser) return;
 
-    userBooksList = StorageService.getBooksByUserId(currentUser.id);
-    allUserLogs = StorageService.getReadingLogsByUserId(currentUser.id);
+    // Lấy sách và lịch sử đọc từ API
+    userBooksList = await StorageService.getBooks();
+    allUserLogs = await StorageService.getReadingHistory();
 
     // Điền danh sách sách vào dropdown bộ lọc và dropdown thêm mới
     populateBookDropdowns(userBooksList);
@@ -48,7 +49,7 @@ function populateBookDropdowns(books) {
             const opt = document.createElement('option');
             opt.value = b.id;
             opt.textContent = b.title;
-            if (b.id === currentVal) opt.selected = true;
+            if (b.id == currentVal) opt.selected = true;
             filterSelect.appendChild(opt);
         });
     }
@@ -56,8 +57,7 @@ function populateBookDropdowns(books) {
     if (addSelect) {
         addSelect.innerHTML = '<option value="">-- Chọn cuốn sách bạn đang đọc --</option>';
         books.forEach(b => {
-            const progress = StorageService.getBookProgress(b.id);
-            const remaining = Math.max(0, b.totalPages - progress.readPages);
+            const remaining = Math.max(0, b.totalPages - b.readPages);
             const opt = document.createElement('option');
             opt.value = b.id;
             opt.textContent = `${b.title} (Còn ${remaining}/${b.totalPages} trang)`;
@@ -76,7 +76,7 @@ function filterAndRenderHistory() {
     const selectedDate = document.getElementById('dateFilterInput')?.value || '';
 
     let filtered = allUserLogs.filter(log => {
-        const matchBook = selectedBookId === 'all' || log.bookId === selectedBookId;
+        const matchBook = selectedBookId === 'all' || log.bookId == selectedBookId;
         const matchDate = !selectedDate || log.readingDate === selectedDate;
         return matchBook && matchDate;
     });
@@ -119,8 +119,7 @@ function renderHistoryTable(logs) {
     }
 
     tbody.innerHTML = logs.map(log => {
-        const book = StorageService.getBookById(log.bookId);
-        const bookTitle = book ? book.title : '<em style="color: var(--text-muted);">Sách đã bị xóa</em>';
+        const bookTitle = log.bookTitle || 'Sách';
         const formattedDate = formatDate(log.readingDate);
 
         return `
@@ -131,10 +130,10 @@ function renderHistoryTable(logs) {
                 <td class="note-cell">${escapeHtml(log.note || '—')}</td>
                 <td>
                     <div style="display: flex; gap: 0.35rem;">
-                        <button type="button" class="btn-icon" title="Chỉnh sửa bản ghi" onclick="openEditLogModal('${log.id}')">
+                        <button type="button" class="btn-icon" title="Chỉnh sửa bản ghi" onclick="openEditLogModal(${log.id})">
                             <i class="fas fa-pen-to-square"></i>
                         </button>
-                        <button type="button" class="btn-icon delete" title="Xóa bản ghi" onclick="confirmDeleteLog('${log.id}')">
+                        <button type="button" class="btn-icon delete" title="Xóa bản ghi" onclick="confirmDeleteLog(${log.id})">
                             <i class="fas fa-trash-can"></i>
                         </button>
                     </div>
@@ -217,7 +216,7 @@ function openAddLogModal(preselectedBookId = null) {
     const addDateInput = document.getElementById('addLogDate');
     if (addDateInput) addDateInput.value = today;
 
-    // Refresh lại dropdown sách để cập nhật số trang còn lại mới nhất
+    // Refresh lại dropdown sách
     populateBookDropdowns(userBooksList);
 
     if (preselectedBookId) {
@@ -234,7 +233,7 @@ function openAddLogModal(preselectedBookId = null) {
 /**
  * Xử lý thêm mới bản ghi đọc sách
  */
-function handleAddLogSubmit(e) {
+async function handleAddLogSubmit(e) {
     e.preventDefault();
     const currentUser = StorageService.getCurrentUser();
     if (!currentUser) return;
@@ -246,7 +245,6 @@ function handleAddLogSubmit(e) {
 
     const pagesRead = parseInt(pagesReadInput.value, 10);
 
-    // Validation cơ bản
     if (!bookId) {
         showToast('Vui lòng chọn cuốn sách đã đọc!', 'error');
         return;
@@ -261,39 +259,20 @@ function handleAddLogSubmit(e) {
         return;
     }
 
-    // QUY TẮC NGHIỆP VỤ BẮT BUỘC:
-    // Số trang đã đọc của một cuốn sách không được vượt quá tổng số trang của sách
-    const book = StorageService.getBookById(bookId);
-    if (!book) {
-        showToast('Sách không tồn tại!', 'error');
-        return;
-    }
-
-    const progress = StorageService.getBookProgress(bookId);
-    const remainingPages = book.totalPages - progress.readPages;
-
-    if (pagesRead > remainingPages) {
-        showToast(`Số trang đọc (${pagesRead} trang) vượt quá số trang còn lại của cuốn sách (tối đa còn ${remainingPages} trang)!`, 'error');
-        pagesReadInput.focus();
-        return;
-    }
-
-    // Thêm bản ghi
-    const newLog = StorageService.createReadingLog({
-        userId: currentUser.id,
+    // Gọi API thêm bản ghi
+    const result = await StorageService.createReadingLog({
         bookId,
         readingDate,
         pagesRead,
         note
     });
 
-    if (newLog) {
+    if (result && result.success) {
         closeModal('addLogModal');
-        const newProgress = StorageService.getBookProgress(bookId);
-        showToast(`Đã ghi nhận đọc thành công +${pagesRead} trang! Tiến độ sách: ${newProgress.percent}%`, 'success');
-        
-        // Cập nhật lại danh sách và giao diện
+        showToast(result.message || 'Đã ghi nhận lần đọc sách thành công!', 'success');
         loadReadingHistoryPage();
+    } else {
+        showToast((result && result.message) || 'Lỗi khi ghi nhận đọc sách!', 'error');
     }
 }
 
@@ -301,27 +280,21 @@ function handleAddLogSubmit(e) {
  * Mở modal Chỉnh sửa bản ghi
  */
 function openEditLogModal(logId) {
-    const log = StorageService.getReadingLogById(logId);
+    const log = allUserLogs.find(l => l.id == logId);
     if (!log) return;
 
-    const book = StorageService.getBookById(log.bookId);
+    const book = userBooksList.find(b => b.id == log.bookId);
 
     document.getElementById('editLogId').value = log.id;
     document.getElementById('editLogBookId').value = log.bookId;
-    document.getElementById('editLogBookTitle').textContent = book ? book.title : 'Sách đã xóa';
+    document.getElementById('editLogBookTitle').textContent = log.bookTitle || 'Sách';
     document.getElementById('editLogDate').value = log.readingDate;
     document.getElementById('editLogPages').value = log.pagesRead;
     document.getElementById('editLogNote').value = log.note || '';
 
-    // Hiển thị gợi ý số trang tối đa hợp lệ khi sửa
-    const progress = StorageService.getBookProgress(log.bookId);
-    // Số trang đọc từ các lần đọc KHÁC bản ghi này
-    const otherReadPages = progress.rawReadPages - log.pagesRead;
-    const maxAllowed = Math.max(0, book.totalPages - otherReadPages);
-
     const hintEl = document.getElementById('editRemainingHint');
-    if (hintEl) {
-        hintEl.textContent = `Cuốn sách có tổng cộng ${book.totalPages} trang. Với bản ghi này, số trang tối đa có thể nhập là ${maxAllowed} trang.`;
+    if (hintEl && book) {
+        hintEl.textContent = `Cuốn sách này có tổng cộng ${book.totalPages} trang.`;
     }
 
     openModal('editLogModal');
@@ -330,14 +303,10 @@ function openEditLogModal(logId) {
 /**
  * Xử lý submit sửa bản ghi
  */
-function handleEditLogSubmit(e) {
+async function handleEditLogSubmit(e) {
     e.preventDefault();
 
     const logId = document.getElementById('editLogId').value;
-    const log = StorageService.getReadingLogById(logId);
-    if (!log) return;
-
-    const book = StorageService.getBookById(log.bookId);
     const readingDate = document.getElementById('editLogDate').value;
     const pagesReadInput = document.getElementById('editLogPages');
     const note = document.getElementById('editLogNote').value.trim();
@@ -350,28 +319,18 @@ function handleEditLogSubmit(e) {
         return;
     }
 
-    // Kiểm tra quy tắc nghiệp vụ: Tổng trang sau khi sửa không được vượt quá totalPages
-    const currentProgress = StorageService.getBookProgress(log.bookId);
-    const otherReadPages = currentProgress.rawReadPages - log.pagesRead;
-    const newTotalRead = otherReadPages + newPagesRead;
-
-    if (book && newTotalRead > book.totalPages) {
-        const maxAllowed = book.totalPages - otherReadPages;
-        showToast(`Tổng số trang đọc sẽ vượt quá tổng số trang của sách! Số trang tối đa bạn có thể nhập là ${maxAllowed} trang.`, 'error');
-        pagesReadInput.focus();
-        return;
-    }
-
-    const updated = StorageService.updateReadingLog(logId, {
+    const result = await StorageService.updateReadingLog(logId, {
         readingDate,
         pagesRead: newPagesRead,
         note
     });
 
-    if (updated) {
+    if (result && result.success) {
         closeModal('editLogModal');
-        showToast('Đã cập nhật bản ghi lịch sử đọc!', 'success');
+        showToast(result.message || 'Đã cập nhật bản ghi lịch sử đọc!', 'success');
         loadReadingHistoryPage();
+    } else {
+        showToast((result && result.message) || 'Lỗi khi sửa bản ghi!', 'error');
     }
 }
 
@@ -379,30 +338,31 @@ function handleEditLogSubmit(e) {
  * Xử lý Xóa bản ghi
  */
 function confirmDeleteLog(logId) {
-    const log = StorageService.getReadingLogById(logId);
+    const log = allUserLogs.find(l => l.id == logId);
     if (!log) return;
 
     deleteLogTargetId = logId;
-    const book = StorageService.getBookById(log.bookId);
-    const bookTitle = book ? book.title : 'Sách';
-
     const msgEl = document.getElementById('deleteLogMessage');
     if (msgEl) {
-        msgEl.innerHTML = `Bạn có chắc chắn muốn xóa bản ghi đọc <strong>${log.pagesRead} trang</strong> của cuốn sách <strong>"${escapeHtml(bookTitle)}"</strong> ngày ${formatDate(log.readingDate)}? Tiến độ đọc sách sẽ được tính toán lại.`;
+        msgEl.innerHTML = `Bạn có chắc chắn muốn xóa bản ghi đọc <strong>${log.pagesRead} trang</strong> của cuốn sách <strong>"${escapeHtml(log.bookTitle || 'Sách')}"</strong> ngày ${formatDate(log.readingDate)}?`;
     }
 
     openModal('deleteLogModal');
 }
 
-function executeDeleteLog() {
+async function executeDeleteLog() {
     if (!deleteLogTargetId) return;
 
-    StorageService.deleteReadingLog(deleteLogTargetId);
+    const result = await StorageService.deleteReadingLog(deleteLogTargetId);
     closeModal('deleteLogModal');
     deleteLogTargetId = null;
 
-    showToast('Đã xóa bản ghi lịch sử đọc thành công!', 'success');
-    loadReadingHistoryPage();
+    if (result && result.success) {
+        showToast(result.message || 'Đã xóa bản ghi lịch sử đọc thành công!', 'success');
+        loadReadingHistoryPage();
+    } else {
+        showToast((result && result.message) || 'Lỗi khi xóa bản ghi!', 'error');
+    }
 }
 
 /**
@@ -413,19 +373,12 @@ function checkUrlQueryParams() {
     const bookId = urlParams.get('bookId');
 
     if (bookId) {
-        const book = StorageService.getBookById(bookId);
-        if (book) {
-            // Tự động mở modal thêm nhật ký cho cuốn sách này
-            setTimeout(() => {
-                openAddLogModal(bookId);
-            }, 200);
-        }
+        setTimeout(() => {
+            openAddLogModal(bookId);
+        }, 300);
     }
 }
 
-/**
- * Helper formats
- */
 function formatDate(dateStr) {
     if (!dateStr) return '';
     const parts = dateStr.split('-');

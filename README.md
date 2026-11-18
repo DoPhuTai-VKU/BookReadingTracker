@@ -1,53 +1,65 @@
-# Book Reading Tracker – Website Theo Dõi Thói Quen Đọc Sách (Front-end)
-
-Dự án Front-end website cá nhân giúp theo dõi tiến độ, quản lý danh sách sách, ghi chép nhật ký đọc sách và trực quan hóa thói quen đọc sách bằng biểu đồ.
-
----
-
-## 1. Công nghệ sử dụng
-- **HTML5**: Cấu trúc giao diện ngữ nghĩa (Semantic HTML5).
-- **CSS3**: Bố cục Flexbox, CSS Grid, biến CSS (`:root`), hiệu ứng chuyển động mượt mà và thiết kế Responsive (Mobile, Tablet, Desktop).
-- **JavaScript (Vanilla JS)**: Xử lý logic nghiệp vụ, tính toán tiến độ, lọc dữ liệu realtime và tương tác người dùng.
-- **Chart.js (CDN)**: Trực quan hóa dữ liệu thống kê bằng biểu đồ cột, biểu đồ tròn (Doughnut) và biểu đồ thanh ngang.
-- **Font Awesome 6 (CDN)**: Hệ thống biểu tượng trực quan.
-- **localStorage**: Mô phỏng cơ sở dữ liệu và quản lý phiên người dùng (Session).
+# 📚 Book Reading Tracker – Website Theo Dõi Thói Quen Đọc Sách
+> **Đồ án môn học / Đồ án tốt nghiệp**: Ứng dụng Web theo dõi tiến độ đọc sách cá nhân, quản lý tủ sách, ghi nhật ký đọc và trực quan hóa thói quen đọc bằng biểu đồ thống kê.
 
 ---
 
-## 2. Cấu trúc thư mục
+## 1. Công nghệ sử dụng trong đồ án
+
+### 🔹 Backend:
+- **Ngôn ngữ**: Python 3
+- **Framework**: Flask (Micro web framework gọn nhẹ, dễ học, dễ bảo trì)
+- **Cơ sở dữ liệu**: MySQL (kết nối qua XAMPP, port 3306, user `root`, password trống)
+- **Thư viện ORM**: `Flask-SQLAlchemy` (thao tác CSDL thông qua Class Model trực quan)
+- **Driver kết nối MySQL**: `PyMySQL`
+- **Bảo mật**: Mã hóa mật khẩu bằng `werkzeug.security` (`generate_password_hash`, `check_password_hash`)
+- **Cơ chế dự phòng**: Tự động chuyển sang SQLite nếu MySQL chưa bật.
+
+### 🔹 Front-end:
+- **HTML5 & CSS3**: Giao diện chuẩn Semantic, Responsive mượt mà (Mobile, Tablet, Desktop).
+- **JavaScript (Vanilla JS)**: Xử lý giao diện và gọi RESTful API bằng `fetch()` bất đồng bộ (`async / await`).
+- **Chart.js**: Vẽ 3 biểu đồ thống kê (Cột, Tròn Doughnut, Thanh ngang).
+- **Font Awesome 6**: Hệ thống icon trực quan.
+
+---
+
+## 2. Cấu trúc thư mục mã nguồn
 
 ```
 BookReadingTracker/
 │
-├── index.html                  # Trang điều hướng ban đầu (kiểm tra Auth Guard)
+├── app.py                      # File khởi chạy máy chủ Flask & các RESTful API
+├── config.py                   # Cấu hình kết nối MySQL và Secret Key
+├── models.py                   # Khai báo các Model (User, Book, ReadingHistory)
+├── database.sql                # File SQL tạo bảng và nạp dữ liệu mẫu
+├── requirements.txt            # Danh sách các thư viện Python cần thiết
+├── index.html                  # Trang điều hướng ban đầu
 │
 ├── pages/
-│   ├── login.html              # Trang đăng nhập
-│   ├── register.html           # Trang đăng ký tài khoản mới
-│   ├── dashboard.html          # Trang tổng quan
-│   ├── books.html              # Trang quản lý sách cá nhân
-│   ├── reading-history.html    # Trang nhật ký lịch sử đọc
-│   ├── statistics.html         # Trang thống kê & phân tích biểu đồ
-│   └── profile.html            # Trang hồ sơ cá nhân
+│   ├── login.html              # Trang Đăng nhập
+│   ├── register.html           # Trang Đăng ký
+│   ├── dashboard.html          # Trang Tổng quan (Dashboard)
+│   ├── books.html              # Trang Quản lý sách cá nhân
+│   ├── reading-history.html    # Trang Lịch sử đọc sách
+│   ├── statistics.html         # Trang Thống kê & Biểu đồ
+│   └── profile.html            # Trang Thông tin cá nhân
 │
 ├── css/
-│   ├── style.css               # Hệ thống CSS chung, Sidebar, Header, Modal, Toast
-│   ├── auth.css                # Giao diện Đăng nhập & Đăng ký
-│   ├── dashboard.css           # Thẻ số liệu, biểu đồ tổng quan
-│   ├── books.css               # Thẻ sách, thanh tiến độ, bộ lọc
-│   ├── reading-history.css     # Bảng nhật ký, bộ lọc ngày & sách
-│   ├── statistics.css          # Lưới biểu đồ Chart.js
-│   └── profile.css             # Hồ sơ cá nhân, thống kê mini
+│   ├── style.css               # CSS chung (Layout, Sidebar, Modal, Toast)
+│   ├── auth.css                # CSS Đăng nhập & Đăng ký
+│   ├── dashboard.css           # CSS Dashboard
+│   ├── books.css               # CSS Thẻ sách & bộ lọc
+│   ├── reading-history.css     # CSS Bảng lịch sử đọc
+│   ├── statistics.css          # CSS Lưới biểu đồ
+│   └── profile.css             # CSS Hồ sơ cá nhân
 │
 ├── js/
-│   ├── storage.js              # Tầng trừu tượng StorageService (Repository pattern)
-│   ├── data.js                 # Dữ liệu mẫu ban đầu (Mock Data)
-│   ├── auth.js                 # Xử lý Đăng nhập, Đăng ký, toggle password
-│   ├── main.js                 # App shell, Toast notification, Modal helpers, Logout
-│   ├── dashboard.js            # Tính toán chỉ số & vẽ biểu đồ Dashboard
-│   ├── books.js                # CRUD sách, tìm kiếm realtime, lọc trạng thái/thể loại
-│   ├── reading-history.js      # CRUD lịch sử đọc, ràng buộc nghiệp vụ số trang
-│   ├── statistics.js           # 3 biểu đồ Chart.js và chỉ số phân tích chuyên sâu
+│   ├── storage.js              # Tầng gọi API Backend (fetch API)
+│   ├── auth.js                 # Xử lý Đăng ký, Đăng nhập
+│   ├── main.js                 # App shell, Toast, Modal, Đăng xuất
+│   ├── dashboard.js            # Hiển thị số liệu & biểu đồ Dashboard
+│   ├── books.js                # CRUD sách, tìm kiếm, lọc
+│   ├── reading-history.js      # CRUD lịch sử đọc, kiểm soát số trang
+│   ├── statistics.js           # 3 biểu đồ Chart.js
 │   └── profile.js              # Cập nhật thông tin cá nhân
 │
 └── assets/
@@ -56,80 +68,62 @@ BookReadingTracker/
 
 ---
 
-## 3. Tài khoản Demo có sẵn
+## 3. Sơ đồ cơ sở dữ liệu (Database Schema)
 
-Khi mở website lần đầu tiên, hệ thống tự động khởi tạo dữ liệu mẫu cho tài khoản thử nghiệm:
+Cơ sở dữ liệu: `book_reading_tracker` gồm 3 bảng quan hệ chặt chẽ:
 
+1. **`users`** (Người dùng):
+   - `id`: INT (Khóa chính, tự tăng)
+   - `full_name`: VARCHAR(100) (Họ và tên)
+   - `email`: VARCHAR(120) (Email đăng nhập - UNIQUE)
+   - `password`: VARCHAR(255) (Mật khẩu đã mã hóa an toàn)
+   - `created_at`: DATETIME
+
+2. **`books`** (Sách):
+   - `id`: INT (Khóa chính, tự tăng)
+   - `user_id`: INT (Khóa ngoại $\rightarrow$ `users.id`)
+   - `title`: VARCHAR(255) (Tên sách)
+   - `author`: VARCHAR(150) (Tác giả)
+   - `category`: VARCHAR(100) (Thể loại)
+   - `total_pages`: INT (Tổng số trang)
+   - `created_at`: DATETIME
+
+3. **`reading_history`** (Lịch sử đọc):
+   - `id`: INT (Khóa chính, tự tăng)
+   - `user_id`: INT (Khóa ngoại $\rightarrow$ `users.id`)
+   - `book_id`: INT (Khóa ngoại $\rightarrow$ `books.id`)
+   - `reading_date`: VARCHAR(20) (Ngày đọc, định dạng `YYYY-MM-DD`)
+   - `pages_read`: INT (Số trang đã đọc)
+   - `note`: TEXT (Ghi chú / cảm nghĩ)
+   - `created_at`: DATETIME
+
+---
+
+## 4. Tài khoản Demo có sẵn
+
+Hệ thống đã nạp sẵn tài khoản mẫu để bạn và giảng viên có thể test ngay:
 - **Email**: `demo@reading.com`
 - **Mật khẩu**: `password123`
-- *Hoặc bấm nút **"Đăng nhập tài khoản mẫu (Demo)"** tại trang Login để điền và đăng nhập ngay.*
-
-> **Lưu ý về quy tắc phân tách dữ liệu:**  
-> Nếu bạn đăng ký một tài khoản mới (ví dụ: `myaccount@test.com`), tài khoản này sẽ hoàn toàn độc lập, có tủ sách và lịch sử đọc riêng rẽ, không dùng chung hay thấy dữ liệu của tài khoản Demo.
+*(Hoặc tại trang Login, bấm nút **"Đăng nhập tài khoản mẫu (Demo)"** để điền nhanh).*
 
 ---
 
-## 4. Các quy tắc nghiệp vụ đã được triển khai
+## 5. Hướng dẫn chạy đồ án
 
-1. **Ràng buộc số trang đọc**:
-   - Số trang đọc mỗi lần bắt buộc là **số nguyên dương (> 0)**.
-   - Tổng số trang đã đọc của một cuốn sách **không được vượt quá tổng số trang** của cuốn sách đó.
-2. **Tính toán tiến độ tự động**:
-   - `Tiến độ (%) = (Tổng số trang đã đọc / Tổng số trang của sách) × 100%`.
-   - Khi tiến độ đạt `100%` $\rightarrow$ Trạng thái tự động chuyển thành **"Đã hoàn thành"**.
-   - Khi tiến độ `< 100%` $\rightarrow$ Trạng thái là **"Đang đọc"**.
-3. **Đồng bộ dữ liệu hai chiều**:
-   - Khi thêm, sửa hoặc xóa một bản ghi trong lịch sử đọc, tiến độ sách tương ứng, số liệu Dashboard và biểu đồ Statistics sẽ được tính toán và cập nhật lại đồng bộ.
-   - Khi xóa một cuốn sách, các bản ghi lịch sử đọc của cuốn sách đó cũng được dọn sạch để tránh rác dữ liệu.
-4. **Auth Guard & Session**:
-   - Không cho phép người dùng truy cập các trang quản trị (`pages/*.html`) khi chưa đăng nhập (tự động chuyển hướng về `login.html`).
-   - Duy trì đăng nhập khi F5 / tải lại trang qua `localStorage`.
-   - Đăng xuất chỉ xóa phiên làm việc (`brt_current_user`), **không làm mất** dữ liệu sách và nhật ký đọc đã lưu.
+### Bước 1: Bật MySQL trong XAMPP
+- Mở **XAMPP Control Panel** và nhấn **Start** tại mục **MySQL** (cổng mặc định 3306).
 
----
+### Bước 2: Khởi chạy máy chủ Flask
+Mở Terminal tại thư mục `BookReadingTracker` và chạy lệnh:
+```bash
+python app.py
+```
 
-## 5. Hướng dẫn mở và kiểm thử
+Khi chạy, ứng dụng sẽ tự động:
+1. Tạo Database `book_reading_tracker` trong MySQL (nếu chưa có).
+2. Tạo 3 bảng `users`, `books`, `reading_history`.
+3. Nạp sẵn tài khoản Demo và sách mẫu.
 
-### Cách 1: Khởi chạy bằng Flask (Khuyên dùng)
-1. Cài đặt Flask nếu chưa có:
-   ```bash
-   pip install -r requirements.txt
-   ```
-2. Khởi chạy file `app.py`:
-   ```bash
-   python app.py
-   ```
-3. Truy cập vào trình duyệt theo đường dẫn:  
-   👉 **http://127.0.0.1:5000**
-
----
-
-### Cách 2: Mở trực tiếp bằng trình duyệt
-1. Mở file `index.html` hoặc `pages/login.html` bằng trình duyệt bất kỳ (Google Chrome, Microsoft Edge, Firefox).
-2. Hoặc sử dụng extension **Live Server** trong VS Code để trải nghiệm tốt nhất.
-2. **Kiểm tra luồng hoạt động**:
-   - **Đăng nhập**: Dùng tài khoản Demo hoặc bấm nút "Đăng nhập tài khoản mẫu".
-   - **Xem Dashboard**: Quan sát 4 thẻ số liệu, biểu đồ cột các ngày gần đây, danh sách sách đang đọc và nhật ký đọc gần nhất.
-   - **Quản lý sách**: Thử thêm sách mới, tìm kiếm theo tên, lọc theo thể loại/trạng thái, sửa thông tin sách.
-   - **Ghi nhật ký đọc**: Vào "Lịch sử đọc", thêm một lần đọc mới (chú ý dropdown hiển thị số trang còn lại của sách), kiểm tra validate không cho nhập vượt quá số trang còn lại.
-   - **Thống kê**: Kiểm tra 3 biểu đồ trực quan hóa dữ liệu (cột, tròn, thanh ngang).
-   - **Hồ sơ**: Sửa họ và tên $\rightarrow$ Tên trên Header và Sidebar được cập nhật ngay lập tức.
-   - **Đăng ký tài khoản mới**: Đăng xuất $\rightarrow$ Đăng ký tài khoản mới $\rightarrow$ Kiểm tra tủ sách trống, độc lập hoàn toàn với tài khoản Demo.
-
----
-
-## 6. Sẵn sàng tích hợp Backend Python Flask + MySQL
-
-Toàn bộ phần gọi dữ liệu đã được trừu tượng hóa gọn gàng trong file `js/storage.js` (`StorageService`).  
-Khi xây dựng Backend Flask sau này, bạn chỉ cần thay thế các hàm trong `StorageService` bằng các lời gọi `fetch('/api/...')` hoặc `axios` mà **không cần phải viết lại giao diện**:
-
-| Phương thức StorageService | Endpoint Flask RESTful tương ứng |
-|---|---|
-| `StorageService.findUserByEmail` / `login` | `POST /api/auth/login` |
-| `StorageService.createUser` | `POST /api/auth/register` |
-| `StorageService.getBooksByUserId` | `GET /api/books` |
-| `StorageService.createBook` | `POST /api/books` |
-| `StorageService.updateBook` | `PUT /api/books/<id>` |
-| `StorageService.deleteBook` | `DELETE /api/books/<id>` |
-| `StorageService.getReadingLogsByUserId` | `GET /api/reading-logs` |
-| `StorageService.createReadingLog` | `POST /api/reading-logs` |
+### Bước 3: Mở trình duyệt trải nghiệm
+Truy cập đường dẫn:  
+👉 **http://127.0.0.1:5000**

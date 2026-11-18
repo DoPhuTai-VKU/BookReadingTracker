@@ -1,7 +1,3 @@
-/**
- * dashboard.js - Xử lý hiển thị số liệu tổng quan & biểu đồ Dashboard
- */
-
 let readingChartInstance = null;
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -9,9 +5,9 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 /**
- * Tải và hiển thị toàn bộ số liệu trên Dashboard
+ * Tải và hiển thị toàn bộ số liệu trên Dashboard từ API
  */
-function loadDashboardData() {
+async function loadDashboardData() {
     const currentUser = StorageService.getCurrentUser();
     if (!currentUser) return;
 
@@ -21,8 +17,9 @@ function loadDashboardData() {
         welcomeName.textContent = currentUser.fullName;
     }
 
-    // Lấy thống kê tổng quan
-    const stats = StorageService.getUserStatistics(currentUser.id);
+    // Lấy thống kê từ Backend API
+    const stats = await StorageService.getDashboardStats();
+    if (!stats) return;
 
     // Cập nhật các thẻ số liệu
     animateNumber('statTotalBooks', stats.totalBooks);
@@ -31,13 +28,14 @@ function loadDashboardData() {
     animateNumber('statReadingDays', stats.uniqueReadingDays);
 
     // Render danh sách sách đang đọc gần đây
-    renderCurrentlyReadingBooks(currentUser.id);
+    renderCurrentlyReadingBooks(stats.currentlyReading || []);
 
     // Render bảng hoạt động đọc gần nhất
-    renderRecentLogs(currentUser.id);
+    renderRecentLogs(stats.recentLogs || []);
 
-    // Render biểu đồ số trang theo ngày
-    renderReadingTrendChart(currentUser.id);
+    // Lấy lịch sử để vẽ biểu đồ
+    const logs = await StorageService.getReadingHistory();
+    renderReadingTrendChart(logs);
 }
 
 /**
@@ -72,14 +70,11 @@ function animateNumber(elementId, targetNumber) {
 /**
  * Render danh sách sách đang đọc
  */
-function renderCurrentlyReadingBooks(userId) {
+function renderCurrentlyReadingBooks(readingBooks) {
     const container = document.getElementById('currentlyReadingList');
     if (!container) return;
 
-    const books = StorageService.getUserBooksWithProgress(userId);
-    const readingBooks = books.filter(b => b.status === 'Đang đọc').slice(0, 4);
-
-    if (readingBooks.length === 0) {
+    if (!readingBooks || readingBooks.length === 0) {
         container.innerHTML = `
             <div class="empty-state" style="padding: 2rem 1rem;">
                 <div class="empty-state-icon" style="width: 50px; height: 50px; font-size: 1.3rem;">
@@ -122,13 +117,11 @@ function renderCurrentlyReadingBooks(userId) {
 /**
  * Render các lần đọc sách gần đây nhất
  */
-function renderRecentLogs(userId) {
+function renderRecentLogs(logs) {
     const tbody = document.getElementById('recentLogsTableBody');
     if (!tbody) return;
 
-    const logs = StorageService.getReadingLogsByUserId(userId).slice(0, 5);
-
-    if (logs.length === 0) {
+    if (!logs || logs.length === 0) {
         tbody.innerHTML = `
             <tr>
                 <td colspan="4" style="text-align: center; padding: 2.5rem; color: var(--text-muted);">
@@ -141,8 +134,7 @@ function renderRecentLogs(userId) {
     }
 
     tbody.innerHTML = logs.map(log => {
-        const book = StorageService.getBookById(log.bookId);
-        const bookTitle = book ? book.title : 'Sách đã xóa';
+        const bookTitle = log.bookTitle || 'Sách';
         const formattedDate = formatDate(log.readingDate);
 
         return `
@@ -161,15 +153,13 @@ function renderRecentLogs(userId) {
 /**
  * Vẽ biểu đồ số trang đọc theo ngày bằng Chart.js
  */
-function renderReadingTrendChart(userId) {
+function renderReadingTrendChart(logs) {
     const canvas = document.getElementById('readingTrendChart');
     if (!canvas) return;
 
-    const logs = StorageService.getReadingLogsByUserId(userId);
-
     // Nhóm số trang theo ngày
     const pagesByDate = {};
-    logs.forEach(log => {
+    (logs || []).forEach(log => {
         const date = log.readingDate;
         pagesByDate[date] = (pagesByDate[date] || 0) + (parseInt(log.pagesRead, 10) || 0);
     });
@@ -262,9 +252,6 @@ function renderReadingTrendChart(userId) {
     });
 }
 
-/**
- * Format ngày YYYY-MM-DD sang DD/MM/YYYY
- */
 function formatDate(dateStr) {
     if (!dateStr) return '';
     const parts = dateStr.split('-');
@@ -274,9 +261,6 @@ function formatDate(dateStr) {
     return dateStr;
 }
 
-/**
- * Escape chuỗi HTML tránh XSS
- */
 function escapeHtml(str) {
     if (!str) return '';
     return str

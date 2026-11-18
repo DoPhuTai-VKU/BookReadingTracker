@@ -1,7 +1,3 @@
-/**
- * books.js - Quản lý danh sách sách cá nhân (CRUD, Search, Filter)
- */
-
 let allUserBooks = [];
 let deleteBookTargetId = null;
 
@@ -11,13 +7,13 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 /**
- * Tải danh sách sách và render
+ * Tải danh sách sách từ API và render
  */
-function loadUserBooks() {
+async function loadUserBooks() {
     const currentUser = StorageService.getCurrentUser();
     if (!currentUser) return;
 
-    allUserBooks = StorageService.getUserBooksWithProgress(currentUser.id);
+    allUserBooks = await StorageService.getBooks();
     populateCategoryFilter(allUserBooks);
     filterAndRenderBooks();
 }
@@ -32,8 +28,8 @@ function filterAndRenderBooks() {
 
     let filtered = allUserBooks.filter(book => {
         // Tìm kiếm theo tên sách hoặc tác giả
-        const matchKeyword = !searchKeyword || 
-            book.title.toLowerCase().includes(searchKeyword) || 
+        const matchKeyword = !searchKeyword ||
+            book.title.toLowerCase().includes(searchKeyword) ||
             book.author.toLowerCase().includes(searchKeyword);
 
         // Lọc theo trạng thái
@@ -144,10 +140,10 @@ function renderBooksGrid(books) {
                         <i class="fas fa-plus"></i> Đọc sách
                     </a>
                     <div class="book-actions">
-                        <button type="button" class="btn-icon" title="Chỉnh sửa sách" onclick="openEditBookModal('${book.id}')">
+                        <button type="button" class="btn-icon" title="Chỉnh sửa sách" onclick="openEditBookModal(${book.id})">
                             <i class="fas fa-pen-to-square"></i>
                         </button>
-                        <button type="button" class="btn-icon delete" title="Xóa sách" onclick="confirmDeleteBook('${book.id}')">
+                        <button type="button" class="btn-icon delete" title="Xóa sách" onclick="confirmDeleteBook(${book.id})">
                             <i class="fas fa-trash-can"></i>
                         </button>
                     </div>
@@ -204,7 +200,7 @@ function openAddBookModal() {
     setTimeout(() => document.getElementById('addBookTitle')?.focus(), 100);
 }
 
-function handleAddBookSubmit(e) {
+async function handleAddBookSubmit(e) {
     e.preventDefault();
     const currentUser = StorageService.getCurrentUser();
     if (!currentUser) return;
@@ -220,19 +216,8 @@ function handleAddBookSubmit(e) {
     const totalPages = parseInt(totalPagesInput.value, 10);
 
     // Validation
-    if (!title) {
-        showToast('Vui lòng nhập tên cuốn sách!', 'error');
-        titleInput.focus();
-        return;
-    }
-    if (!author) {
-        showToast('Vui lòng nhập tên tác giả!', 'error');
-        authorInput.focus();
-        return;
-    }
-    if (!category) {
-        showToast('Vui lòng nhập hoặc chọn thể loại sách!', 'error');
-        categoryInput.focus();
+    if (!title || !author || !category) {
+        showToast('Vui lòng điền đầy đủ các thông tin bắt buộc!', 'error');
         return;
     }
     if (isNaN(totalPages) || totalPages <= 0) {
@@ -241,19 +226,20 @@ function handleAddBookSubmit(e) {
         return;
     }
 
-    // Thêm vào Storage
-    const newBook = StorageService.createBook({
-        userId: currentUser.id,
+    // Gọi Backend API
+    const result = await StorageService.createBook({
         title,
         author,
         category,
         totalPages
     });
 
-    if (newBook) {
+    if (result && result.success) {
         closeModal('addBookModal');
-        showToast(`Đã thêm cuốn sách "${newBook.title}" thành công!`, 'success');
+        showToast(result.message || 'Đã thêm sách mới thành công!', 'success');
         loadUserBooks();
+    } else {
+        showToast((result && result.message) || 'Lỗi khi thêm sách!', 'error');
     }
 }
 
@@ -261,10 +247,8 @@ function handleAddBookSubmit(e) {
  * Xử lý sửa sách
  */
 function openEditBookModal(bookId) {
-    const book = StorageService.getBookById(bookId);
+    const book = allUserBooks.find(b => b.id == bookId);
     if (!book) return;
-
-    const progress = StorageService.getBookProgress(bookId);
 
     document.getElementById('editBookId').value = book.id;
     document.getElementById('editBookTitle').value = book.title;
@@ -272,16 +256,15 @@ function openEditBookModal(bookId) {
     document.getElementById('editBookCategory').value = book.category;
     document.getElementById('editBookTotalPages').value = book.totalPages;
 
-    // Hiển thị gợi ý số trang đã đọc hiện tại
     const readPagesHint = document.getElementById('editBookReadPagesHint');
     if (readPagesHint) {
-        readPagesHint.textContent = `Cuốn sách này hiện đã đọc ${progress.readPages} trang.`;
+        readPagesHint.textContent = `Cuốn sách này hiện đã đọc ${book.readPages} trang.`;
     }
 
     openModal('editBookModal');
 }
 
-function handleEditBookSubmit(e) {
+async function handleEditBookSubmit(e) {
     e.preventDefault();
     const bookId = document.getElementById('editBookId').value;
     const title = document.getElementById('editBookTitle').value.trim();
@@ -299,25 +282,19 @@ function handleEditBookSubmit(e) {
         return;
     }
 
-    // Kiểm tra quy tắc nghiệp vụ: tổng trang mới không nên nhỏ hơn tổng số trang đã đọc trong lịch sử
-    const progress = StorageService.getBookProgress(bookId);
-    if (totalPages < progress.rawReadPages) {
-        if (!confirm(`Cảnh báo: Bạn đã ghi nhận đọc ${progress.rawReadPages} trang cho cuốn sách này. Nếu đặt tổng số trang là ${totalPages}, tiến độ sẽ được điều chỉnh ở mức 100%. Bạn có muốn tiếp tục?`)) {
-            return;
-        }
-    }
-
-    const updated = StorageService.updateBook(bookId, {
+    const result = await StorageService.updateBook(bookId, {
         title,
         author,
         category,
         totalPages
     });
 
-    if (updated) {
+    if (result && result.success) {
         closeModal('editBookModal');
-        showToast(`Đã cập nhật cuốn sách "${updated.title}"!`, 'success');
+        showToast(result.message || 'Đã cập nhật cuốn sách thành công!', 'success');
         loadUserBooks();
+    } else {
+        showToast((result && result.message) || 'Lỗi khi sửa sách!', 'error');
     }
 }
 
@@ -325,7 +302,7 @@ function handleEditBookSubmit(e) {
  * Xử lý xóa sách
  */
 function confirmDeleteBook(bookId) {
-    const book = StorageService.getBookById(bookId);
+    const book = allUserBooks.find(b => b.id == bookId);
     if (!book) return;
 
     deleteBookTargetId = bookId;
@@ -337,23 +314,21 @@ function confirmDeleteBook(bookId) {
     openModal('deleteBookModal');
 }
 
-function executeDeleteBook() {
+async function executeDeleteBook() {
     if (!deleteBookTargetId) return;
 
-    const book = StorageService.getBookById(deleteBookTargetId);
-    const bookTitle = book ? book.title : '';
-
-    StorageService.deleteBook(deleteBookTargetId);
+    const result = await StorageService.deleteBook(deleteBookTargetId);
     closeModal('deleteBookModal');
     deleteBookTargetId = null;
 
-    showToast(`Đã xóa cuốn sách "${bookTitle}" thành công!`, 'success');
-    loadUserBooks();
+    if (result && result.success) {
+        showToast(result.message || 'Đã xóa cuốn sách thành công!', 'success');
+        loadUserBooks();
+    } else {
+        showToast((result && result.message) || 'Lỗi khi xóa sách!', 'error');
+    }
 }
 
-/**
- * Escape string
- */
 function escapeHtml(str) {
     if (!str) return '';
     return str

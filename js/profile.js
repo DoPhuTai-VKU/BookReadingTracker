@@ -1,5 +1,5 @@
 /**
- * profile.js - Quản lý trang thông tin cá nhân của người dùng
+ * profile.js - Quản lý trang thông tin cá nhân của người dùng qua API Flask
  */
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -8,14 +8,12 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 /**
- * Tải thông tin người dùng và các chỉ số tóm tắt
+ * Tải thông tin người dùng và các chỉ số tóm tắt từ API
  */
-function loadUserProfile() {
+async function loadUserProfile() {
     const currentUser = StorageService.getCurrentUser();
     if (!currentUser) return;
 
-    // Tải dữ liệu thống kê cá nhân
-    const stats = StorageService.getUserStatistics(currentUser.id);
     const initials = getInitials(currentUser.fullName);
 
     // Cập nhật card đại diện
@@ -27,11 +25,14 @@ function loadUserProfile() {
     if (nameEl) nameEl.textContent = currentUser.fullName;
     if (emailEl) emailEl.textContent = currentUser.email;
 
-    // Mini stats
-    const booksCount = document.getElementById('profileBooksCount');
-    const pagesCount = document.getElementById('profilePagesCount');
-    if (booksCount) booksCount.textContent = stats.totalBooks;
-    if (pagesCount) pagesCount.textContent = stats.totalPagesRead.toLocaleString('vi-VN');
+    // Lấy số liệu thống kê từ API
+    const stats = await StorageService.getDashboardStats();
+    if (stats) {
+        const booksCount = document.getElementById('profileBooksCount');
+        const pagesCount = document.getElementById('profilePagesCount');
+        if (booksCount) booksCount.textContent = stats.totalBooks;
+        if (pagesCount) pagesCount.textContent = stats.totalPagesRead.toLocaleString('vi-VN');
+    }
 
     // Điền dữ liệu vào form
     const inputFullName = document.getElementById('profileFullName');
@@ -52,7 +53,7 @@ function initProfileForm() {
     const form = document.getElementById('profileForm');
     if (!form) return;
 
-    form.addEventListener('submit', (e) => {
+    form.addEventListener('submit', async (e) => {
         e.preventDefault();
 
         const currentUser = StorageService.getCurrentUser();
@@ -61,42 +62,31 @@ function initProfileForm() {
         const fullNameInput = document.getElementById('profileFullName');
         const newFullName = fullNameInput.value.trim();
 
-        if (!newFullName) {
-            showToast('Họ và tên không được để trống!', 'error');
-            fullNameInput.focus();
-            return;
-        }
-
-        if (newFullName.length < 2) {
+        if (!newFullName || newFullName.length < 2) {
             showToast('Họ và tên phải có ít nhất 2 ký tự!', 'error');
             fullNameInput.focus();
             return;
         }
 
-        // Cập nhật vào Storage
-        const updatedUser = StorageService.updateUser(currentUser.id, {
-            fullName: newFullName
-        });
+        // Gọi Backend API cập nhật profile
+        const result = await StorageService.updateProfile(newFullName);
 
-        if (updatedUser) {
+        if (result && result.success) {
             showToast('Đã cập nhật thông tin cá nhân thành công!', 'success');
             
             // Cập nhật lại giao diện trang profile
             loadUserProfile();
 
-            // Cập nhật lại Header & Sidebar ngay lập tức
+            // Cập nhật lại Header & Sidebar
             if (typeof initAppShell === 'function') {
                 initAppShell();
             }
         } else {
-            showToast('Không thể cập nhật thông tin cá nhân. Vui lòng thử lại!', 'error');
+            showToast((result && result.message) || 'Lỗi khi cập nhật thông tin cá nhân!', 'error');
         }
     });
 }
 
-/**
- * Format ngày giờ ISO
- */
 function formatDateTime(isoString) {
     if (!isoString) return 'Chưa rõ';
     try {

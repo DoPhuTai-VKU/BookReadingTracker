@@ -117,10 +117,14 @@ function initMobileMenu() {
 function initLogoutButtons() {
     const logoutBtns = document.querySelectorAll('.btn-logout, #btnLogout');
     logoutBtns.forEach(btn => {
-        btn.addEventListener('click', (e) => {
+        btn.addEventListener('click', async (e) => {
             e.preventDefault();
             if (confirm('Bạn có chắc chắn muốn đăng xuất khỏi tài khoản này?')) {
-                StorageService.clearSession();
+                if (typeof StorageService.logout === 'function') {
+                    await StorageService.logout();
+                } else {
+                    StorageService.clearSession();
+                }
                 const isPages = window.location.pathname.includes('/pages/');
                 window.location.href = isPages ? 'login.html' : 'pages/login.html';
             }

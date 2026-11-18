@@ -1,5 +1,5 @@
 /**
- * statistics.js - Xử lý tính toán thống kê chuyên sâu & vẽ biểu đồ Chart.js
+ * statistics.js - Xử lý tính toán thống kê chuyên sâu & vẽ biểu đồ từ API Flask
  */
 
 let chartPagesInstance = null;
@@ -11,44 +11,38 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 /**
- * Tải toàn bộ dữ liệu phân tích và vẽ biểu đồ
+ * Tải toàn bộ dữ liệu phân tích từ Backend API và vẽ biểu đồ
  */
-function loadStatisticsPage() {
+async function loadStatisticsPage() {
     const currentUser = StorageService.getCurrentUser();
     if (!currentUser) return;
 
-    const stats = StorageService.getUserStatistics(currentUser.id);
-    const books = StorageService.getUserBooksWithProgress(currentUser.id);
-    const logs = StorageService.getReadingLogsByUserId(currentUser.id);
+    const data = await StorageService.getStatistics();
+    if (!data || !data.success) return;
+
+    const summary = data.summary || {};
+    const charts = data.charts || {};
 
     // Điền các thẻ tóm tắt
-    document.getElementById('statTotalPages').textContent = stats.totalPagesRead.toLocaleString('vi-VN');
-    document.getElementById('statAvgPages').textContent = stats.avgPagesPerDay.toLocaleString('vi-VN');
-    document.getElementById('statReadingDays').textContent = stats.uniqueReadingDays;
-
-    const completionRate = stats.totalBooks > 0 ? Math.round((stats.completedBooks / stats.totalBooks) * 100) : 0;
-    document.getElementById('statCompletionRate').textContent = `${completionRate}%`;
+    document.getElementById('statTotalPages').textContent = (summary.totalPagesRead || 0).toLocaleString('vi-VN');
+    document.getElementById('statAvgPages').textContent = (summary.avgPagesPerDay || 0).toLocaleString('vi-VN');
+    document.getElementById('statReadingDays').textContent = summary.uniqueReadingDays || 0;
+    document.getElementById('statCompletionRate').textContent = `${summary.completionRate || 0}%`;
 
     // Vẽ 3 biểu đồ
-    renderPagesByDayChart(logs);
-    renderCategoryChart(books);
-    renderBookProgressChart(books);
+    renderPagesByDayChart(charts.pagesByDate || {});
+    renderCategoryChart(charts.categories || {});
+    renderBookProgressChart(charts.bookProgress || []);
 }
 
 /**
  * 1. BIỂU ĐỒ CỘT: SỐ TRANG ĐÃ ĐỌC THEO NGÀY
  */
-function renderPagesByDayChart(logs) {
+function renderPagesByDayChart(pagesByDate) {
     const canvas = document.getElementById('chartPagesByDay');
     if (!canvas) return;
 
     if (chartPagesInstance) chartPagesInstance.destroy();
-
-    // Nhóm theo ngày
-    const pagesByDate = {};
-    logs.forEach(log => {
-        pagesByDate[log.readingDate] = (pagesByDate[log.readingDate] || 0) + (parseInt(log.pagesRead, 10) || 0);
-    });
 
     const sortedDates = Object.keys(pagesByDate).sort();
 
@@ -108,27 +102,21 @@ function renderPagesByDayChart(logs) {
 /**
  * 2. BIỂU ĐỒ TRÒN: PHÂN BỐ THỂ LOẠI SÁCH
  */
-function renderCategoryChart(books) {
+function renderCategoryChart(categoryCount) {
     const canvas = document.getElementById('chartBooksByCategory');
     if (!canvas) return;
 
     if (chartCategoryInstance) chartCategoryInstance.destroy();
 
-    if (books.length === 0) {
+    const labels = Object.keys(categoryCount);
+    const data = Object.values(categoryCount);
+
+    if (labels.length === 0) {
         showChartEmptyState('chartCategoryContainer', 'Chưa có sách trong tủ');
         return;
     }
 
-    // Đếm số lượng sách theo thể loại
-    const categoryCount = {};
-    books.forEach(b => {
-        const cat = b.category || 'Khác';
-        categoryCount[cat] = (categoryCount[cat] || 0) + 1;
-    });
-
-    const labels = Object.keys(categoryCount);
-    const data = Object.values(categoryCount);
-
+    const totalBooks = data.reduce((a, b) => a + b, 0);
     const modernPalette = [
         '#4f46e5', '#06b6d4', '#10b981', '#f59e0b', '#ec4899', 
         '#8b5cf6', '#14b8a6', '#f97316', '#6366f1', '#64748b'
@@ -160,7 +148,7 @@ function renderCategoryChart(books) {
                 },
                 tooltip: {
                     callbacks: {
-                        label: (ctx) => ` ${ctx.label}: ${ctx.raw} cuốn (${Math.round((ctx.raw / books.length) * 100)}%)`
+                        label: (ctx) => ` ${ctx.label}: ${ctx.raw} cuốn (${Math.round((ctx.raw / totalBooks) * 100)}%)`
                     }
                 }
             },
@@ -172,22 +160,20 @@ function renderCategoryChart(books) {
 /**
  * 3. BIỂU ĐỒ THANH NGANG: TIẾN ĐỘ TỪNG CUỐN SÁCH
  */
-function renderBookProgressChart(books) {
+function renderBookProgressChart(bookProgressList) {
     const canvas = document.getElementById('chartBookProgress');
     if (!canvas) return;
 
     if (chartProgressInstance) chartProgressInstance.destroy();
 
-    if (books.length === 0) {
+    if (!bookProgressList || bookProgressList.length === 0) {
         showChartEmptyState('chartProgressContainer', 'Chưa có sách để hiển thị tiến độ');
         return;
     }
 
-    // Cắt ngắn tên sách nếu quá dài
-    const labels = books.map(b => b.title.length > 25 ? b.title.substring(0, 25) + '...' : b.title);
-    const percentages = books.map(b => b.percent);
-
-    const backgroundColors = books.map(b => b.percent === 100 ? '#10b981' : '#4f46e5');
+    const labels = bookProgressList.map(b => b.title.length > 25 ? b.title.substring(0, 25) + '...' : b.title);
+    const percentages = bookProgressList.map(b => b.percent);
+    const backgroundColors = bookProgressList.map(b => b.percent === 100 ? '#10b981' : '#4f46e5');
 
     const ctx = canvas.getContext('2d');
     chartProgressInstance = new Chart(ctx, {
@@ -212,7 +198,7 @@ function renderBookProgressChart(books) {
                 tooltip: {
                     callbacks: {
                         label: (ctx) => {
-                            const book = books[ctx.dataIndex];
+                            const book = bookProgressList[ctx.dataIndex];
                             return `Đã đọc: ${book.readPages}/${book.totalPages} trang (${ctx.raw}%)`;
                         }
                     }
@@ -237,9 +223,6 @@ function renderBookProgressChart(books) {
     });
 }
 
-/**
- * Hiển thị thông báo khi biểu đồ trống
- */
 function showChartEmptyState(containerId, message) {
     const container = document.getElementById(containerId);
     if (!container) return;
